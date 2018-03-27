@@ -4,6 +4,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"time"
 )
 
 const RepoURL = "https://github.com/silinternational/speed-snitch-agent"
@@ -76,4 +77,14 @@ func DownloadFile(filepath string, url string, mode os.FileMode) error {
 	}
 
 	return nil
+}
+
+
+type SpeedTestResults struct {
+	URL       string
+	Download  float64
+	Upload    float64
+	Latency   time.Duration
+	Timestamp time.Time
+	Error     string
 }
