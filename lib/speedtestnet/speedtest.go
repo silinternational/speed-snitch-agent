@@ -10,6 +10,18 @@ import (
 	"io"
 )
 
+const CFG_SERVER_ID = "serverID"
+const CFG_TIME_OUT = "timeOut"
+const CFG_DOWNLOAD_SIZES = "downloadSizes"
+const CFG_UPLOAD_SIZES = "uploadSizes"
+const CFG_MAX_SECONDS = "maxSeconds"
+const CFG_TEST_TYPE = "testType"
+const CFG_TYPE_LATENCY = "latencyTest"
+const CFG_TYPE_DOWNLOAD = "downloadTest"
+const CFG_TYPE_UPLOAD = "uploadTest"
+const CFG_TYPE_ALL = "allTests"
+
+
 var Task agent.Task
 
 func NewClient() (*agent.Task, error) {
@@ -17,7 +29,9 @@ func NewClient() (*agent.Task, error) {
 		Type:     agent.TypeSpeedtest,
 		Schedule: "",
 		Data: agent.TaskData{
-			"URL": "https://speedtest.net",
+			IntValues: map[string]int {
+				CFG_SERVER_ID: 5029,
+			},
 		},
 	}
 
@@ -30,8 +44,6 @@ func tempLog(text string) {
 
 
 type configuration struct {
-	Name           string `json:"Name"`
-	ID             string `json:"ID"`
 	ServerID       int  `json:"ServerID"` // This must be present as an ID value in the serverList.go servers
 	Timeout        int `json:"Timeout"`
 	DownloadSizes  []int `json:"DownloadSizes"`
@@ -216,7 +228,6 @@ func LatencyTest(server *server) {
 		sum += total
 	}
 	server.Results.Latency = sum / 3
-	server.Results.URL = server.URL
 
 }
 
@@ -305,4 +316,124 @@ func UploadTest(server *server, length float64, sizes []int) {
 
 	upBits := float64(totalSize) * 8
 	server.Results.Upload = upBits / upDuration.Seconds() / 1000 / 1000
+}
+
+func getTestType(taskData agent.TaskData) (string, error) {
+
+	var testType string
+	var ok bool
+	if testType, ok = taskData.StringValues[CFG_TEST_TYPE]; ! ok {
+		return "", fmt.Errorf("taskData.StringValues is missing an entry for %s", CFG_TEST_TYPE)
+	}
+
+	validTypes := []string{
+		CFG_TYPE_ALL,
+		CFG_TYPE_DOWNLOAD,
+		CFG_TYPE_LATENCY,
+		CFG_TYPE_UPLOAD,
+	}
+
+	for _, nextValid := range validTypes {
+		if testType == nextValid {
+			return testType, nil
+		}
+	}
+
+	return "", fmt.Errorf("Invalid value in TaskData for %s: %s", CFG_TEST_TYPE, testType)
+}
+
+// RunTest ensures all the needed agent.TaskData values are present and valid and
+//   runs a Latency Test as well as any other requested test(s)
+//
+//   Here are the required values ...
+//     taskData.IntValues:
+//       - CFG_SERVER_ID ... must match one in the serverlist.go file
+//       - CFG_TIME_OUT
+//     taskData.StringValues:
+//       - CFG_TEST_TYPE ...  CFG_TYPE_ALL | CFG_TYPE_DOWNLOAD | CFG_TYPE_LATENCY | CFG_TYPE_UPLOAD
+//     taskData.FloatValues:
+//       - CFG_MAX_SECONDS ... (not required for Latency Tests)
+//     taskData.IntSlices:
+//       - CFG_DOWNLOAD_SIZES ... (only required for Download Tests)
+//       - CFG_UPLOAD_SIZES ... (only required for Upload Tests)
+func RunTest(taskData agent.TaskData) (agent.SpeedTestResults, error) {
+	emptyResults := agent.SpeedTestResults{}
+	var ok bool
+
+	testConfig := configuration{}
+
+	// Get the ID of the speedtestnet server
+	if testConfig.ServerID, ok = taskData.IntValues[CFG_SERVER_ID];  ! ok {
+		return emptyResults, fmt.Errorf("taskData.IntValues is missing an entry for %s", CFG_SERVER_ID)
+	}
+
+	// Get the configuration for the speedtestnet server
+	emptyServer := server{}
+	testServer := GetServerByID(testConfig.ServerID)
+	if testServer == emptyServer {
+		return emptyResults, fmt.Errorf("Could not find speedtestnet server with ID %d", testConfig.ServerID)
+	}
+	testServer.Configuration = &testConfig
+
+	// Get the requested test type (Latency, Download, Upload, All)
+	// Note that a latency test is performed in all cases
+	var testType string
+	var err error
+	if testType, err = getTestType(taskData); err != nil {
+		return emptyResults, err
+	}
+
+	// Get the desired Time-out value for the test
+	timeOut, ok := taskData.IntValues[CFG_TIME_OUT]
+	if !ok {
+		return emptyResults, fmt.Errorf("taskData.IntValues is missing an entry for %s", CFG_TIME_OUT)
+	}
+	testConfig.Timeout = timeOut
+
+	// Set the Source value for the speedtest
+	localAddr := net.TCPAddr{}
+	source, _ := net.ResolveTCPAddr("tcp", localAddr.String())
+
+	spdTest := speedtest{
+		Source: source,
+	}
+
+	// Mutually connect the speedtest and the test server
+	testServer.Speedtest = &spdTest
+	spdTest.Server = &testServer
+
+	// Run Latency Test in all cases
+	LatencyTest(&testServer)
+	if testType == CFG_TYPE_LATENCY {
+		return testServer.Results, nil
+	}
+
+	// Get the desired MaxSeconds value
+	maxSeconds, ok := taskData.FloatValues[CFG_MAX_SECONDS]
+	if ! ok {
+		return emptyResults, fmt.Errorf("taskData.IntValues is missing an entry for %s", CFG_MAX_SECONDS)
+	}
+	testConfig.MaxSeconds = maxSeconds
+
+	// If requested, get the Download Sizes and run the Download test
+	if testType == CFG_TYPE_DOWNLOAD || testType == CFG_TYPE_ALL {
+		downloadSizes, ok := taskData.IntSlices[CFG_DOWNLOAD_SIZES]
+		if ! ok {
+			return emptyResults, fmt.Errorf("taskData.IntSlices is missing an entry for %s", CFG_DOWNLOAD_SIZES)
+		}
+		testConfig.DownloadSizes = downloadSizes
+		DownloadTest(&testServer, testConfig.MaxSeconds, testConfig.DownloadSizes)
+	}
+
+	// If requested, get the Upload Sizes and run the Upload test
+	if testType == CFG_TYPE_UPLOAD || testType == CFG_TYPE_ALL {
+		uploadSizes, ok := taskData.IntSlices[CFG_UPLOAD_SIZES]
+		if ! ok {
+			return emptyResults, fmt.Errorf("taskData.IntSlices is missing an entry for %s", CFG_UPLOAD_SIZES)
+		}
+		testConfig.UploadSizes = uploadSizes
+		UploadTest(&testServer, testConfig.MaxSeconds, testConfig.UploadSizes)
+	}
+
+	return testServer.Results, nil
 }

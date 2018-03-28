@@ -37,7 +37,12 @@ type Task struct {
 	Data     TaskData
 }
 
-type TaskData map[string]string
+type TaskData struct {
+	StringValues map[string]string
+	IntValues map[string]int
+	FloatValues map[string]float64
+	IntSlices map[string][]int
+}
 
 type TaskRunner interface {
 	Run() (string, error)
@@ -81,10 +86,9 @@ func DownloadFile(filepath string, url string, mode os.FileMode) error {
 
 
 type SpeedTestResults struct {
-	URL       string
-	Download  float64
-	Upload    float64
-	Latency   time.Duration
+	Download  float64  // Mb per second
+	Upload    float64  // Mb per second
+	Latency   time.Duration // seconds
 	Timestamp time.Time
 	Error     string
 }
