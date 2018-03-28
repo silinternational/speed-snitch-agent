@@ -23,7 +23,7 @@ func fixture(path string) string {
 
 func TestNewClient(t *testing.T) {
 	client, _ := NewClient()
-	if client.Type != agent.TypeSpeedtest {
+	if client.Type != agent.TypeSpeedTest {
 		t.Error("Speedtest client type not what was epxected, got ", client.Type)
 	}
 }

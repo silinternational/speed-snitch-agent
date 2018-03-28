@@ -26,7 +26,7 @@ var Task agent.Task
 
 func NewClient() (*agent.Task, error) {
 	task := agent.Task{
-		Type:     agent.TypeSpeedtest,
+		Type:     agent.TypeSpeedTest,
 		Schedule: "",
 		Data: agent.TaskData{
 			IntValues: map[string]int {
@@ -342,7 +342,10 @@ func getTestType(taskData agent.TaskData) (string, error) {
 	return "", fmt.Errorf("Invalid value in TaskData for %s: %s", CFG_TEST_TYPE, testType)
 }
 
-// RunTest ensures all the needed agent.TaskData values are present and valid and
+
+type SpeedTestRunner struct {}
+
+// Run ensures all the needed agent.TaskData values are present and valid and
 //   runs a Latency Test as well as any other requested test(s)
 //
 //   Here are the required values ...
@@ -356,7 +359,7 @@ func getTestType(taskData agent.TaskData) (string, error) {
 //     taskData.IntSlices:
 //       - CFG_DOWNLOAD_SIZES ... (only required for Download Tests)
 //       - CFG_UPLOAD_SIZES ... (only required for Upload Tests)
-func RunTest(taskData agent.TaskData) (agent.SpeedTestResults, error) {
+func (s SpeedTestRunner) Run(taskData agent.TaskData) (agent.SpeedTestResults, error) {
 	emptyResults := agent.SpeedTestResults{}
 	var ok bool
 

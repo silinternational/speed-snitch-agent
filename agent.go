@@ -9,8 +9,10 @@ import (
 
 const RepoURL = "https://github.com/silinternational/speed-snitch-agent"
 const TypePing = "ping"
-const TypeSpeedtest = "speedtest"
+const TypeSpeedTest = "speedTest"
 const Version = "0.0.1"
+
+
 
 type Config struct {
 	Version struct {
@@ -35,6 +37,7 @@ type Task struct {
 	Type     string
 	Schedule string
 	Data     TaskData
+	SpeedTestRunner
 }
 
 type TaskData struct {
@@ -44,13 +47,26 @@ type TaskData struct {
 	IntSlices map[string][]int
 }
 
-type TaskRunner interface {
-	Run() (string, error)
+type SpeedTestResults struct {
+	Download  float64  // Mb per second
+	Upload    float64  // Mb per second
+	Latency   time.Duration // seconds
+	Timestamp time.Time
+	Error     string
+}
+
+type SpeedTestRunner interface {
+	Run(TaskData) (SpeedTestResults, error)
+}
+
+type SpeedTestInstance struct {
+	SpeedTestRunner
 }
 
 type LogReporter interface {
 	Process() error
 }
+
 
 // DownloadFile will download a url to a local file. It's efficient because it will
 // write as it downloads and not load the whole file into memory.
@@ -82,13 +98,4 @@ func DownloadFile(filepath string, url string, mode os.FileMode) error {
 	}
 
 	return nil
-}
-
-
-type SpeedTestResults struct {
-	Download  float64  // Mb per second
-	Upload    float64  // Mb per second
-	Latency   time.Duration // seconds
-	Timestamp time.Time
-	Error     string
 }
