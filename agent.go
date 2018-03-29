@@ -13,7 +13,6 @@ const TypeSpeedTest = "speedTest"
 const Version = "0.0.1"
 
 
-
 type Config struct {
 	Version struct {
 		Latest string
