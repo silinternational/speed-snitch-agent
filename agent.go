@@ -4,11 +4,12 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"time"
 )
 
 const RepoURL = "https://github.com/silinternational/speed-snitch-agent"
 const TypePing = "ping"
-const TypeSpeedtest = "speedtest"
+const TypeSpeedTest = "speedTest"
 const Version = "0.0.1"
 
 type Config struct {
@@ -34,16 +35,47 @@ type Task struct {
 	Type     string
 	Schedule string
 	Data     TaskData
+	SpeedTestRunner
 }
 
-type TaskData map[string]string
-
-type TaskRunner interface {
-	Run() (string, error)
+type TaskData struct {
+	StringValues map[string]string
+	IntValues    map[string]int
+	FloatValues  map[string]float64
+	IntSlices    map[string][]int
 }
 
+type SpeedTestResults struct {
+	Download  float64       // Mb per second
+	Upload    float64       // Mb per second
+	Latency   time.Duration // Latency in nanoseconds
+	Timestamp time.Time
+	Error     string
+}
+
+type SpeedTestRunner interface {
+	Run(TaskData) (SpeedTestResults, error)
+}
+
+type SpeedTestInstance struct {
+	SpeedTestRunner
+}
+
+// Any struct that implements a Process method - for swapping which Logging service we use
 type LogReporter interface {
-	Process() error
+	Process(string, string, ...interface{}) error
+}
+
+// Needed to be able to swap in a customized logging struct that implements a Logger
+// To use this ...
+//   ` // mycustomlogapp.go
+//   `type Logger struct {}`
+//   `func (l Logger) Process(logKey, text string, a ...interface{}) { ... }`
+//
+//   `// main.go
+//   `logger := agent.LoggerInstance{mycustomlogapp.Logger{}}`
+type LoggerInstance struct {
+	LogReporter
 }
 
 // DownloadFile will download a url to a local file. It's efficient because it will
