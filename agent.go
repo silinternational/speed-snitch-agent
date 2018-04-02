@@ -13,7 +13,6 @@ const TypeSpeedTest = "speedTest"
 const Version = "0.0.1"
 
 
-
 type Config struct {
 	Version struct {
 		Latest string
@@ -63,10 +62,18 @@ type SpeedTestInstance struct {
 	SpeedTestRunner
 }
 
-type LogReporter interface {
-	Process() error
+// Any struct that implements a Process method - for swapping which Logging service we use
+type LogReporter interface{
+	Process(string, string, ...interface{}) error
 }
 
+// Needed to be able to swap in a customized logging struct that implements a Logger
+// To use this ...
+//   `    type Logger struct {}`
+//   `    func (l Logger) Process(logKey, text string, a ...interface{}) { ... }`
+type LoggerInstance struct {
+	LogReporter
+}
 
 // DownloadFile will download a url to a local file. It's efficient because it will
 // write as it downloads and not load the whole file into memory.
