@@ -12,7 +12,6 @@ const TypePing = "ping"
 const TypeSpeedTest = "speedTest"
 const Version = "0.0.1"
 
-
 type Config struct {
 	Version struct {
 		Latest string
@@ -41,15 +40,15 @@ type Task struct {
 
 type TaskData struct {
 	StringValues map[string]string
-	IntValues map[string]int
-	FloatValues map[string]float64
-	IntSlices map[string][]int
+	IntValues    map[string]int
+	FloatValues  map[string]float64
+	IntSlices    map[string][]int
 }
 
 type SpeedTestResults struct {
-	Download  float64  // Mb per second
-	Upload    float64  // Mb per second
-	Latency   time.Duration // seconds
+	Download  float64       // Mb per second
+	Upload    float64       // Mb per second
+	Latency   time.Duration // Latency in nanoseconds
 	Timestamp time.Time
 	Error     string
 }
@@ -63,7 +62,7 @@ type SpeedTestInstance struct {
 }
 
 // Any struct that implements a Process method - for swapping which Logging service we use
-type LogReporter interface{
+type LogReporter interface {
 	Process(string, string, ...interface{}) error
 }
 
