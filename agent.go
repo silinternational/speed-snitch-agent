@@ -69,8 +69,12 @@ type LogReporter interface{
 
 // Needed to be able to swap in a customized logging struct that implements a Logger
 // To use this ...
-//   `    type Logger struct {}`
-//   `    func (l Logger) Process(logKey, text string, a ...interface{}) { ... }`
+//   ` // mycustomlogapp.go
+//   `type Logger struct {}`
+//   `func (l Logger) Process(logKey, text string, a ...interface{}) { ... }`
+//
+//   `// main.go
+//   `logger := agent.LoggerInstance{mycustomlogapp.Logger{}}`
 type LoggerInstance struct {
 	LogReporter
 }
