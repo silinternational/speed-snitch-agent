@@ -72,9 +72,11 @@ func TestLatencyTestMock(t *testing.T) {
 
 }
 
-// This does a real latency test if you comment out the t.SkipNow() call
+// This does a real latency test unless you use the --short flag
 func TestLatencyTestReal(t *testing.T) {
-	t.SkipNow()
+	if testing.Short() {
+		t.Skip("Skipping test in short mode.")
+	}
 	serverID := 5029
 
 	config := configuration{
@@ -108,9 +110,11 @@ func TestLatencyTestReal(t *testing.T) {
 }
 
 
-// This does a real download test if you comment out the t.SkipNow() call
+// This does a real latency test unless you use the --short flag
 func TestDownloadTestReal(t *testing.T) {
-	t.SkipNow()
+	if testing.Short() {
+		t.Skip("Skipping test in short mode.")
+	}
 	serverID := 5029
 
 	config := configuration{
@@ -145,9 +149,11 @@ func TestDownloadTestReal(t *testing.T) {
 	fmt.Printf("\nDownload test results for server %d ... %f\n", serverID, results)
 }
 
-// This does a real upload test if you comment out the t.SkipNow() call
+// This does a real latency test unless you use the --short flag
 func TestUploadTestReal(t *testing.T) {
-	t.SkipNow()
+	if testing.Short() {
+		t.Skip("Skipping test in short mode.")
+	}
 	serverID := 5029
 
 	config := configuration{
@@ -187,7 +193,9 @@ func TestRunTestBadServerID(t *testing.T) {
 
 	taskData := agent.TaskData{IntValues: map[string]int {CFG_SERVER_ID: serverID }}
 
-	spTestResults, err := RunTest(taskData)
+	spdTestRunner := SpeedTestRunner{}
+
+	spTestResults, err := spdTestRunner.Run(taskData)
 	if spTestResults != emptyTestResults {
 		t.Fatalf("Error: expected empty test results but got:\n%v", spTestResults)
 	}
@@ -211,7 +219,9 @@ func TestRunTestBadTestType(t *testing.T) {
 		IntValues: map[string]int {CFG_SERVER_ID: 5029 },
 	}
 
-	spTestResults, err := RunTest(taskData)
+	spdTestRunner := SpeedTestRunner{}
+
+	spTestResults, err := spdTestRunner.Run(taskData)
 	if spTestResults != emptyTestResults {
 		t.Fatalf("Error: expected empty test results but got:\n%v", spTestResults)
 	}
@@ -227,9 +237,11 @@ func TestRunTestBadTestType(t *testing.T) {
 }
 
 
-// This does a real latency test if you comment out the t.SkipNow() call
+// This does a real latency test unless you use the --short flag
 func TestRunTestLatencyReal(t *testing.T) {
-	t.SkipNow()
+	if testing.Short() {
+		t.Skip("Skipping test in short mode.")
+	}
 
 	taskData := agent.TaskData{
 		StringValues: map[string]string{CFG_TEST_TYPE: CFG_TYPE_LATENCY},
@@ -239,7 +251,9 @@ func TestRunTestLatencyReal(t *testing.T) {
 		},
 	}
 
-	spTestResults, err := RunTest(taskData)
+	spdTestRunner := SpeedTestRunner{}
+
+	spTestResults, err := spdTestRunner.Run(taskData)
 	if err != nil {
 		t.Fatalf("Unexpected Error: \n%s", err.Error())
 	}
@@ -263,9 +277,11 @@ func TestRunTestLatencyReal(t *testing.T) {
 	}
 }
 
-// This does a real latency test if you comment out the t.SkipNow() call
+// This does a real latency test unless you use the --short flag
 func TestRunTestAllReal(t *testing.T) {
-	t.SkipNow()
+	if testing.Short() {
+		t.Skip("Skipping test in short mode.")
+	}
 
 	taskData := agent.TaskData{
 		StringValues: map[string]string{CFG_TEST_TYPE: CFG_TYPE_ALL},
@@ -280,7 +296,9 @@ func TestRunTestAllReal(t *testing.T) {
 		},
 	}
 
-	spTestResults, err := RunTest(taskData)
+	spdTestRunner := SpeedTestRunner{}
+
+	spTestResults, err := spdTestRunner.Run(taskData)
 	if err != nil {
 		t.Fatalf("Unexpected Error: \n%s", err.Error())
 	}
