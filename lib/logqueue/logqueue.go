@@ -1,5 +1,9 @@
 package logqueue
 
+import (
+	"github.com/silinternational/speed-snitch-agent"
+)
+
 const FlushLogQueue = "flushLogQueue"
 
 type TestTracker struct {
@@ -48,15 +52,25 @@ func Stasher(newLogs chan [2]string, completedLogs chan []string) {
 }
 
 // Reporter takes log sets from the completedLogs channel and actually logs them
-func Reporter(completedLogs chan []string, tracker *TestTracker) {
+// The keepOpen channel is for testing - to know when to close the channel
+// In production, the channels will almost never be closed
+func Reporter(
+	completedLogs chan []string,
+	keepOpen chan int,
+	logServiceKey string,
+	logger agent.LoggerInstance,
+	tracker *TestTracker,
+) {
+
 	for nextLogSet := range completedLogs {
 		for _, nextLog := range nextLogSet {
 
-			// TODO Use a real logger
+			_ = logger.Process(logServiceKey, nextLog)
 
 			if tracker.KeepTrack {
 				tracker.ReportedLogs = append(tracker.ReportedLogs, nextLog)
 			}
 		}
+		keepOpen <- 1
 	}
 }

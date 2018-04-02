@@ -2,7 +2,7 @@ package logqueue
 
 import (
 	"testing"
-	"time"
+	"github.com/silinternational/speed-snitch-agent"
 )
 
 func areStringSlicesEqual(slc1, slc2 []string) bool {
@@ -35,6 +35,13 @@ func areStringMapsEqual(map1, map2 map[string][]string) bool {
 	}
 
 	return true
+}
+
+type FakeLogger struct {}
+
+func (f FakeLogger) Process(a, b string, c ...interface{}) error {
+	// Don't do anything with it
+	return nil
 }
 
 func TestAppendMapValueStart(t *testing.T) {
@@ -71,7 +78,6 @@ func TestAppendMapValueAddition(t *testing.T) {
 }
 
 
-
 func TestReporter(t *testing.T) {
 	reportedLogs := []string{}
 
@@ -95,15 +101,26 @@ func TestReporter(t *testing.T) {
 	newLogs := make(chan [2]string)
 	completedLogs := make(chan []string)
 
+	keepOpen := make(chan int, 4)
+
 	go Stasher(newLogs, completedLogs)
-	go Reporter(completedLogs, &testTracker)
+	go Reporter(completedLogs, keepOpen, "fakeLogKey", agent.LoggerInstance{FakeLogger{}}, &testTracker)
 
 	for _, nextSet := range testLogs {
 		newLogs <- nextSet
 	}
 
-	time.Sleep(time.Duration(time.Millisecond * 100)) // avoid using a closed channel
 	close(newLogs)
+
+	logCount := 0
+	for {
+		logCount += <-keepOpen
+		if logCount >= 4 {
+			break
+		}
+	}
+
+	close(keepOpen)
 	close(completedLogs)
 
 	expected := []string {
