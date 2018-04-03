@@ -72,7 +72,7 @@ func TestLatencyTestMock(t *testing.T) {
 
 }
 
-// This does a real latency test unless you use the --short flag
+// This does a real latency test unless you use the -short flag
 func TestLatencyTestReal(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping test in short mode.")
@@ -110,7 +110,7 @@ func TestLatencyTestReal(t *testing.T) {
 }
 
 
-// This does a real latency test unless you use the --short flag
+// This does a real download test unless you use the -short flag
 func TestDownloadTestReal(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping test in short mode.")
@@ -149,7 +149,7 @@ func TestDownloadTestReal(t *testing.T) {
 	fmt.Printf("\nDownload test results for server %d ... %f\n", serverID, results)
 }
 
-// This does a real latency test unless you use the --short flag
+// This does a real upload test unless you use the -short flag
 func TestUploadTestReal(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping test in short mode.")
@@ -237,7 +237,7 @@ func TestRunTestBadTestType(t *testing.T) {
 }
 
 
-// This does a real latency test unless you use the --short flag
+// This does a real latency test unless you use the -short flag
 func TestRunTestLatencyReal(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping test in short mode.")
@@ -277,7 +277,7 @@ func TestRunTestLatencyReal(t *testing.T) {
 	}
 }
 
-// This does a real latency test unless you use the --short flag
+// This does real speed tests unless you use the -short flag
 func TestRunTestAllReal(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping test in short mode.")

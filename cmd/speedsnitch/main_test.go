@@ -12,7 +12,7 @@ import (
 )
 
 
-// This does a real latency test unless you use the --short flag
+// This does a real latency test unless you use the -short flag
 func TestRunLatencyTest(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping test in short mode.")
@@ -51,7 +51,7 @@ func TestRunLatencyTest(t *testing.T) {
 }
 
 
-// This does a real call to logentries unless you use the --short flag
+// This does a real call to logentries unless you use the -short flag
 func TestLogEntries(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping test in short mode.")
