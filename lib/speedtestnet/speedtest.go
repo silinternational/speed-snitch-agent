@@ -317,9 +317,8 @@ func UploadTest(server *server, length float64, sizes []int) {
 
 func getTestType(taskData agent.TaskData) (string, error) {
 
-	var testType string
-	var ok bool
-	if testType, ok = taskData.StringValues[CFG_TEST_TYPE]; !ok {
+	testType, ok := taskData.StringValues[CFG_TEST_TYPE]
+	if !ok {
 		return "", fmt.Errorf("taskData.StringValues is missing an entry for %s", CFG_TEST_TYPE)
 	}
 
@@ -362,7 +361,9 @@ func (s SpeedTestRunner) Run(taskData agent.TaskData) (agent.SpeedTestResults, e
 	testConfig := configuration{}
 
 	// Get the ID of the speedtestnet server
-	if testConfig.ServerID, ok = taskData.IntValues[CFG_SERVER_ID]; !ok {
+	testConfig.ServerID, ok = taskData.IntValues[CFG_SERVER_ID]
+
+	if !ok {
 		return emptyResults, fmt.Errorf("taskData.IntValues is missing an entry for %s", CFG_SERVER_ID)
 	}
 
@@ -376,9 +377,9 @@ func (s SpeedTestRunner) Run(taskData agent.TaskData) (agent.SpeedTestResults, e
 
 	// Get the requested test type (Latency, Download, Upload, All)
 	// Note that a latency test is performed in all cases
-	var testType string
-	var err error
-	if testType, err = getTestType(taskData); err != nil {
+	testType, err := getTestType(taskData)
+
+	if err != nil {
 		return emptyResults, err
 	}
 

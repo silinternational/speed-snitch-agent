@@ -12,9 +12,11 @@ import (
 )
 
 
-// This does a real latency test if you comment out the t.SkipNow() call
+// This does a real latency test unless you use the -short flag
 func TestRunLatencyTest(t *testing.T) {
-	t.SkipNow()
+	if testing.Short() {
+		t.Skip("Skipping test in short mode.")
+	}
 	config := getConfig()
 	taskData := config.Tasks[0].Data
 
@@ -49,9 +51,12 @@ func TestRunLatencyTest(t *testing.T) {
 }
 
 
-// This does a real latency test if you comment out the t.SkipNow() call
+// This does a real call to logentries unless you use the -short flag
 func TestLogEntries(t *testing.T) {
-	t.SkipNow()
+	if testing.Short() {
+		t.Skip("Skipping test in short mode.")
+	}
+
 	logEntriesKey := os.Getenv("LOGENTRIES_KEY")
 
 	if logEntriesKey == "" {
