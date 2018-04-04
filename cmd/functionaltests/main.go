@@ -1,10 +1,8 @@
 package main
 
 import (
-	"os"
 	"github.com/silinternational/speed-snitch-agent"
 	"github.com/silinternational/speed-snitch-agent/lib/speedtestnet"
-	"fmt"
 	"gopkg.in/robfig/cron.v2"
 	"github.com/silinternational/speed-snitch-agent/lib/tasks"
 	"runtime"
@@ -29,13 +27,6 @@ func main() {
 
 	go logqueue.Manager(newLogs, "fakeLogKey", &agent.LoggerInstance{testLogger})
 
-	logEntriesKey := os.Getenv("LOGENTRIES_KEY")
-
-	if logEntriesKey == "" {
-		fmt.Errorf("No LOGENTRIES_KEY env variable available.")
-		return
-	}
-
 	config := getConfig()
 
 	mainCron := cron.New()
@@ -59,7 +50,7 @@ func getConfig() agent.Config {
 		Tasks: []agent.Task{
 			{
 				Type:     agent.TypePing,
-				Schedule: "*/10 * * * * *", // ping every 10 seconds
+				Schedule: "10,20,30,50 * * * * *", // ping every 10 seconds
 				Data: agent.TaskData{
 					StringValues: map[string]string{
 						speedtestnet.CFG_TEST_TYPE: speedtestnet.CFG_TYPE_LATENCY,
@@ -74,8 +65,28 @@ func getConfig() agent.Config {
 				SpeedTestRunner: agent.SpeedTestInstance{speedtestnet.SpeedTestRunner{}},
 			},
 			{
+				Type:     agent.TypeSpeedTest,
+				Schedule: "40 * * * * *", // ping every 10 seconds
+				Data: agent.TaskData{
+					StringValues: map[string]string{
+						speedtestnet.CFG_TEST_TYPE: speedtestnet.CFG_TYPE_ALL,
+					},
+					IntValues: map[string]int{
+						speedtestnet.CFG_SERVER_ID: 5029,
+						speedtestnet.CFG_TIME_OUT:  5,
+					},
+					FloatValues: map[string]float64{speedtestnet.CFG_MAX_SECONDS: 6},
+					IntSlices: map[string][]int{
+						speedtestnet.CFG_DOWNLOAD_SIZES: {245388, 505544},
+						speedtestnet.CFG_UPLOAD_SIZES:   {32768, 65536},
+					},
+				},
+
+				SpeedTestRunner: agent.SpeedTestInstance{speedtestnet.SpeedTestRunner{}},
+			},
+			{
 				Type:     logqueue.FlushLogQueue,
-				Schedule: "*/27 * * * * *",
+				Schedule: "55 * * * * *",
 			},
 		},
 		Log: struct {
