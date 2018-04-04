@@ -63,34 +63,27 @@ func TestLogEntries(t *testing.T) {
 		t.Fatal("No LOGENTRIES_KEY env variable available.")
 	}
 
-	testTracker := logqueue.TestTracker{
-		KeepTrack: false,
-	}
-
 	logger := agent.LoggerInstance{logentries.Logger{}}
 
-	testLogs := [][2]string {
-		{"Type1", "Speed Snitch Agent: TestLogEntries ...  log1"},
-		{"Type1", "Speed Snitch Agent: TestLogEntries ...  log2"},
-		{"Type1", logqueue.FlushLogQueue},
+	testLogs := []string {
+		"Speed Snitch Agent: TestLogEntries ...  log1",
+		"Speed Snitch Agent: TestLogEntries ...  log2",
+		logqueue.FlushLogQueue,
 	}
 
-	newLogs := make(chan [2]string)
-	completedLogs := make(chan []string)
-	keepOpen := make(chan int, 1)
+	newLogs := make(chan string)
+	keepOpen := make(chan int)
 
-	go logqueue.Stasher(newLogs, completedLogs)
-	go logqueue.Reporter(completedLogs, keepOpen, logEntriesKey, logger, &testTracker)
+	go logqueue.Manager(newLogs, keepOpen, logEntriesKey, &logger)
 
-	for _, nextSet := range testLogs {
-		newLogs <- nextSet
+	for _, nextLog := range testLogs {
+		newLogs <- nextLog
+		<-keepOpen
 	}
 
-	<-keepOpen
 
-	time.Sleep(time.Duration(time.Millisecond * 500)) // allow time for connection to logentries
+	time.Sleep(time.Duration(time.Millisecond * 1000)) // allow time for connection to logentries
 	close(newLogs)
-	close(completedLogs)
 	close(keepOpen)
 
 	println(`TO SEE THE RESULTS OF THIS TEST
