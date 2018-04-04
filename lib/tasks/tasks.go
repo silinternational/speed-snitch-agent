@@ -50,6 +50,16 @@ func UpdateTasks(
 			mainCron.AddFunc(
 				task.Schedule,
 				func(){
+
+					spdTestRunner := speedtestnet.SpeedTestRunner{}
+					spTestResults, err := spdTestRunner.Run(task.Data)
+					if err != nil {
+						newLogs <- "Error running speed test task: " + err.Error()
+					} else {
+						newLogs <- fmt.Sprintf("Latency Results: %f milliseconds", spTestResults.Latency.Seconds() * 1000)
+						newLogs <- fmt.Sprintf("Download Results: %f Mb/sec", spTestResults.Download)
+						newLogs <- fmt.Sprintf("Upload Results: %f Mb/sec", spTestResults.Upload)
+					}
 					println("\nRunning SpeedTest Task")
 				},
 			)
