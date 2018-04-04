@@ -72,19 +72,16 @@ func TestLogEntries(t *testing.T) {
 	}
 
 	newLogs := make(chan string)
-	keepOpen := make(chan int)
 
-	go logqueue.Manager(newLogs, keepOpen, logEntriesKey, &logger)
+	go logqueue.Manager(newLogs, logEntriesKey, &logger)
 
 	for _, nextLog := range testLogs {
 		newLogs <- nextLog
-		<-keepOpen
 	}
 
 
 	time.Sleep(time.Duration(time.Millisecond * 1000)) // allow time for connection to logentries
 	close(newLogs)
-	close(keepOpen)
 
 	println(`TO SEE THE RESULTS OF THIS TEST
 Go to the logentries set that matches your LOGENTRIES_KEY env var and look for ...

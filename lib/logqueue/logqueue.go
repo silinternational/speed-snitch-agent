@@ -17,14 +17,12 @@ type TestTracker struct {
 //  it processes all the logs in its store and removes them.
 func Manager(
 	newLogs chan string,
-	keepOpen chan int,
 	logServiceKey string,
 	logger *agent.LoggerInstance,
 ) {
 	logQueue := []string{}
 
 	for newLog := range newLogs {
-		keepOpen <- 1
 
 		// If it's not time to flush the queue, append the new log to the queue
 		if newLog != FlushLogQueue {

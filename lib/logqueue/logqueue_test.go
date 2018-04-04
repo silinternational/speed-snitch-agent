@@ -3,6 +3,7 @@ package logqueue
 import (
 	"testing"
 	"github.com/silinternational/speed-snitch-agent"
+	"time"
 )
 
 var reportedLogs []string
@@ -49,23 +50,16 @@ func TestManager(t *testing.T) {
 	}
 
 	newLogs := make(chan string, 10000)
-	keepOpen := make(chan int)
 
-	go Manager(newLogs, keepOpen, "fakeLogKey", &agent.LoggerInstance{testLogger})
+	go Manager(newLogs, "fakeLogKey", &agent.LoggerInstance{testLogger})
 
 	for _, nextLog := range testLogs {
 		newLogs <- nextLog
 	}
 
-	logCount := 0
-	for {
-		logCount += <-keepOpen
-		if logCount >= 10 {
-			break
-		}
-	}
+	// Give the Manager time to do its work
+	time.Sleep(time.Duration(time.Millisecond * 10)) // allow time for connection to logentries
 
-	close(keepOpen)
 	close(newLogs)
 
 	expected := []string {
