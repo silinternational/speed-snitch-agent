@@ -1,7 +1,9 @@
 package agent
 
 import (
+	"bytes"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"time"
@@ -13,44 +15,41 @@ const TypeSpeedTest = "speedTest"
 const Version = "0.0.1"
 
 type Config struct {
+	BaseURL string `json:"base_url"`
+
 	Version struct {
-		Latest string
-		URL    string
-	}
+		Number string `json:"number"`
+		URL    string `json:"url"`
+	} `json:"version"`
 
 	Log struct {
 		Format      string
 		Destination string
 	}
 
-	Tasks []Task
-}
-
-type Status struct {
-	Version string
-	Uptime  string
+	Tasks []Task `json:"tasks"`
 }
 
 type Task struct {
-	Type     string
-	Schedule string
-	Data     TaskData
+	Type     string   `json:"type"`
+	Schedule string   `json:"schedule"`
+	Data     TaskData `json:"data"`
 	SpeedTestRunner
 }
 
 type TaskData struct {
-	StringValues map[string]string
-	IntValues    map[string]int
-	FloatValues  map[string]float64
-	IntSlices    map[string][]int
+	StringValues map[string]string  `json:"StringValues"`
+	IntValues    map[string]int     `json:"IntValues"`
+	FloatValues  map[string]float64 `json:"FloatValues"`
+	IntSlices    map[string][]int   `json:"IntSlices"`
 }
 
 type SpeedTestResults struct {
-	Download  float64       // Mb per second
-	Upload    float64       // Mb per second
-	Latency   time.Duration // Latency in nanoseconds
-	Timestamp time.Time
-	Error     string
+	Download  float64       `json:"download"` // Mb per second
+	Upload    float64       `json:"upload"`   // Mb per second
+	Latency   time.Duration `json:"latency"`  // Latency in nanoseconds
+	Timestamp time.Time     `json:"timestamp"`
+	Error     string        `json:"error"`
 }
 
 type SpeedTestRunner interface {
@@ -108,4 +107,21 @@ func DownloadFile(filepath string, url string, mode os.FileMode) error {
 	}
 
 	return nil
+}
+
+// getMacAddr gets the MAC hardware
+// address of the host machine
+func GetMacAddr() string {
+	addr := ""
+	interfaces, err := net.Interfaces()
+	if err == nil {
+		for _, i := range interfaces {
+			if i.Flags&net.FlagUp != 0 && bytes.Compare(i.HardwareAddr, nil) != 0 {
+				// Don't use random as we have a real address
+				addr = i.HardwareAddr.String()
+				break
+			}
+		}
+	}
+	return addr
 }
