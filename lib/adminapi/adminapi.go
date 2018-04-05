@@ -64,7 +64,7 @@ func SayHello(config agent.Config, agentStartTime time.Time) (bool, error) {
 	}
 	helloJson, err := json.Marshal(helloBody)
 	if err != nil {
-		return false, fmt.Errorf("Unable to marshal json for /hello call")
+		return false, fmt.Errorf("unable to marshal json for /hello call")
 	}
 
 	resp, err := CallAPI("POST", config.BaseURL+"/hello", string(helloJson), map[string]string{})
@@ -73,7 +73,7 @@ func SayHello(config agent.Config, agentStartTime time.Time) (bool, error) {
 	}
 
 	if resp.StatusCode != 204 {
-		return false, fmt.Errorf("Call to /hello did not return 204, got: %v", resp.StatusCode)
+		return false, fmt.Errorf("call to /hello did not return 204, got: %v", resp.StatusCode)
 	}
 
 	return true, nil
@@ -88,8 +88,15 @@ func GetConfig(baseURL string) (agent.Config, error) {
 		return agent.Config{}, err
 	}
 
+	// If successful but empty response, agent is not yet configured so only set BaseURL on config and return
+	if resp.StatusCode == 204 {
+		return agent.Config{
+			BaseURL: baseURL,
+		}, nil
+	}
+
 	if resp.StatusCode != 200 {
-		return agent.Config{}, fmt.Errorf("Unable to get config, got status code %d", resp.StatusCode)
+		return agent.Config{}, fmt.Errorf("unable to get config, got status code %d", resp.StatusCode)
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)

@@ -88,3 +88,31 @@ func TestGetConfig(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestGetConfigEmptyBody(t *testing.T) {
+	mux := http.NewServeMux()
+	server := httptest.NewServer(mux)
+
+	respBody := ""
+
+	mux.HandleFunc("/config/"+agent.GetMacAddr(), func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Set("Content-type", "application/json")
+		w.WriteHeader(204)
+		fmt.Fprintf(w, respBody)
+	})
+
+	config, err := GetConfig(server.URL)
+	if err != nil {
+		t.Errorf(err.Error())
+		t.Fail()
+	}
+
+	expected := agent.Config{
+		BaseURL: server.URL,
+	}
+
+	if config.BaseURL != expected.BaseURL {
+		t.Errorf("Returned config.BaseURL not what was expected, got %s", config.BaseURL)
+		t.Fail()
+	}
+}
