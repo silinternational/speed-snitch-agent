@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -123,5 +124,5 @@ func GetMacAddr() string {
 			}
 		}
 	}
-	return addr
+	return strings.ToLower(addr)
 }
