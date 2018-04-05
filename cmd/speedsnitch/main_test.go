@@ -80,7 +80,7 @@ func TestLogEntries(t *testing.T) {
 	}
 
 
-	time.Sleep(time.Duration(time.Millisecond * 1000)) // allow time for connection to logentries
+	time.Sleep(time.Millisecond * 1000) // allow time for connection to logentries
 	close(newLogs)
 
 	println(`TO SEE THE RESULTS OF THIS TEST
