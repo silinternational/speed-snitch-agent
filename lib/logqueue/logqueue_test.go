@@ -58,7 +58,7 @@ func TestManager(t *testing.T) {
 	}
 
 	// Give the Manager time to do its work
-	time.Sleep(time.Duration(time.Millisecond * 10)) // allow time for connection to logentries
+	time.Sleep(time.Millisecond * 10) // allow time for connection to logentries
 
 	close(newLogs)
 
