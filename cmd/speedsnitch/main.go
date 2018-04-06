@@ -18,7 +18,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	config, err := adminapi.GetConfig(os.Args[1])
+	_, err := adminapi.GetConfig(os.Args[1])
 	if err != nil {
 		fmt.Println("Unable to fetch config from admin API:", err)
 		os.Exit(1)
