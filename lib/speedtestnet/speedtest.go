@@ -11,6 +11,7 @@ import (
 )
 
 const CFG_SERVER_ID = "serverID"
+const CFG_SERVER_HOST = "Host"
 const CFG_TIME_OUT = "timeOut"
 const CFG_DOWNLOAD_SIZES = "downloadSizes"
 const CFG_UPLOAD_SIZES = "uploadSizes"
@@ -345,9 +346,10 @@ type SpeedTestRunner struct{}
 //
 //   Here are the required values ...
 //     taskData.IntValues:
-//       - CFG_SERVER_ID ... must match one in the serverlist.go file
+//       - CFG_SERVER_ID
 //       - CFG_TIME_OUT
 //     taskData.StringValues:
+//       - CFG_SERVER_HOST
 //       - CFG_TEST_TYPE ...  CFG_TYPE_ALL | CFG_TYPE_DOWNLOAD | CFG_TYPE_LATENCY | CFG_TYPE_UPLOAD
 //     taskData.FloatValues:
 //       - CFG_MAX_SECONDS ... (not required for Latency Tests)
@@ -367,12 +369,15 @@ func (s SpeedTestRunner) Run(taskData agent.TaskData) (agent.SpeedTestResults, e
 		return emptyResults, fmt.Errorf("taskData.IntValues is missing an entry for %s", CFG_SERVER_ID)
 	}
 
-	// Get the configuration for the speedtestnet server
-	emptyServer := server{}
-	testServer := GetServerByID(testConfig.ServerID)
-	if testServer == emptyServer {
-		return emptyResults, fmt.Errorf("Could not find speedtestnet server with ID %d", testConfig.ServerID)
+	// Get the Host of the speedtestnet server
+	serverHost, ok := taskData.StringValues[CFG_SERVER_HOST]
+
+	if !ok {
+		return emptyResults, fmt.Errorf("taskData.StringValues is missing an entry for %s", CFG_SERVER_HOST)
 	}
+
+	testServer := server{}
+	testServer.Host = serverHost
 	testServer.Configuration = &testConfig
 
 	// Get the requested test type (Latency, Download, Upload, All)
