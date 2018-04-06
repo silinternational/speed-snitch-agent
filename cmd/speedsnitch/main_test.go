@@ -35,7 +35,7 @@ func TestRunLatencyTest(t *testing.T) {
       "Schedule": "5 */6 * * *",
       "Data": {
         "StringValues": {
-          "testType": "allTests",
+          "testType": "latencyTest",
           "Host": "nyc.speedtest.sbcglobal.net:8080"
         },
         "IntValues": {
@@ -63,7 +63,8 @@ func TestRunLatencyTest(t *testing.T) {
 	config, _ := adminapi.GetConfig(server.URL)
 	taskData := config.Tasks[0].Data
 
-	speedster := config.Tasks[0].SpeedTestRunner
+	speedster := agent.SpeedTestInstance{speedtestnet.SpeedTestRunner{}}
+
 	spTestResults, err := speedster.Run(taskData)
 
 	if err != nil {

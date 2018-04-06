@@ -187,35 +187,16 @@ func TestUploadTestReal(t *testing.T) {
 	fmt.Printf("\nUpload test results for server %d ... %f\n", serverID, results)
 }
 
-func TestRunTestBadServerID(t *testing.T) {
-	serverID := 666
-	emptyTestResults := agent.SpeedTestResults{}
-
-	taskData := agent.TaskData{IntValues: map[string]int {CFG_SERVER_ID: serverID }}
-
-	spdTestRunner := SpeedTestRunner{}
-
-	spTestResults, err := spdTestRunner.Run(taskData)
-	if spTestResults != emptyTestResults {
-		t.Fatalf("Error: expected empty test results but got:\n%v", spTestResults)
-	}
-
-	expected := fmt.Sprintf("Could not find speedtestnet server with ID %d", serverID)
-	if err.Error() != expected {
-		t.Fatalf(
-			"Error: Got wrong error message.\n  Expected: %s\n    But got: %s\n",
-			expected,
-			err.Error(),
-		)
-	}
-}
 
 func TestRunTestBadTestType(t *testing.T) {
 	emptyTestResults := agent.SpeedTestResults{}
 	testType := "BadTestType"
 
 	taskData := agent.TaskData{
-		StringValues: map[string]string{CFG_TEST_TYPE: testType},
+		StringValues: map[string]string{
+			CFG_TEST_TYPE: testType,
+			CFG_SERVER_HOST: "nyc.speedtest.sbcglobal.net:8080",
+		},
 		IntValues: map[string]int {CFG_SERVER_ID: 5029 },
 	}
 
@@ -244,7 +225,10 @@ func TestRunTestLatencyReal(t *testing.T) {
 	}
 
 	taskData := agent.TaskData{
-		StringValues: map[string]string{CFG_TEST_TYPE: CFG_TYPE_LATENCY},
+		StringValues: map[string]string{
+			CFG_TEST_TYPE: CFG_TYPE_LATENCY,
+			CFG_SERVER_HOST: "nyc.speedtest.sbcglobal.net:8080",
+		},
 		IntValues: map[string]int {
 			CFG_SERVER_ID: 5029,
 			CFG_TIME_OUT: 5,
@@ -284,7 +268,10 @@ func TestRunTestAllReal(t *testing.T) {
 	}
 
 	taskData := agent.TaskData{
-		StringValues: map[string]string{CFG_TEST_TYPE: CFG_TYPE_ALL},
+		StringValues: map[string]string{
+			CFG_TEST_TYPE: CFG_TYPE_ALL,
+			CFG_SERVER_HOST: "nyc.speedtest.sbcglobal.net:8080",
+		},
 		IntValues: map[string]int {
 			CFG_SERVER_ID: 5029,
 			CFG_TIME_OUT: 5,
