@@ -16,25 +16,25 @@ const TypeSpeedTest = "speedTest"
 const Version = "0.0.1"
 
 type Config struct {
-	BaseURL string `json:"base_url"`
+	BaseURL string `json:"BaseURL"`
 
 	Version struct {
-		Number string `json:"number"`
-		URL    string `json:"url"`
-	} `json:"version"`
+		Number string `json:"Number"`
+		URL    string `json:"URL"`
+	} `json:"Version"`
 
 	Log struct {
 		Format      string
 		Destination string
 	}
 
-	Tasks []Task `json:"tasks"`
+	Tasks []Task `json:"Tasks"`
 }
 
 type Task struct {
-	Type     string   `json:"type"`
-	Schedule string   `json:"schedule"`
-	Data     TaskData `json:"data"`
+	Type     string   `json:"Type"`
+	Schedule string   `json:"Schedule"`
+	Data     TaskData `json:"Data"`
 	SpeedTestRunner
 }
 
@@ -46,11 +46,11 @@ type TaskData struct {
 }
 
 type SpeedTestResults struct {
-	Download  float64       `json:"download"` // Mb per second
-	Upload    float64       `json:"upload"`   // Mb per second
-	Latency   time.Duration `json:"latency"`  // Latency in nanoseconds
-	Timestamp time.Time     `json:"timestamp"`
-	Error     string        `json:"error"`
+	Download  float64       `json:"Download,omitempty"` // Mb per second
+	Upload    float64       `json:"Upload,omitempty"`   // Mb per second
+	Latency   time.Duration `json:"Latency,omitempty"`  // Latency in nanoseconds
+	Timestamp time.Time     `json:"Timestamp"`
+	Error     string        `json:"Error"`
 }
 
 type SpeedTestRunner interface {

@@ -25,16 +25,12 @@ func TestSayHello(t *testing.T) {
 	}
 
 	startTime := time.Now()
-	resp, err := SayHello(config, startTime)
+	err := SayHello(config, startTime)
 	if err != nil {
 		t.Errorf("Failed to say hello, err: %s", err)
 		t.Fail()
 	}
 
-	if !resp {
-		t.Errorf("SayHello returned false, hmm")
-		t.Fail()
-	}
 }
 
 func TestGetConfig(t *testing.T) {
@@ -113,6 +109,19 @@ func TestGetConfigEmptyBody(t *testing.T) {
 
 	if config.BaseURL != expected.BaseURL {
 		t.Errorf("Returned config.BaseURL not what was expected, got %s", config.BaseURL)
+		t.Fail()
+	}
+
+	emptyVersion := struct {
+		Number string `json:"Number"`
+		URL    string `json:"URL"`
+	}{
+		Number: "",
+		URL:    "",
+	}
+
+	if config.Version != emptyVersion {
+		t.Errorf("Returned config.Version not what was expected, got %v", config.Version)
 		t.Fail()
 	}
 }

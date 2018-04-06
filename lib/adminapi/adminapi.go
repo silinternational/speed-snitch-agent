@@ -54,7 +54,7 @@ func CallAPI(method, url, postData string, headers map[string]string) (*http.Res
 }
 
 // SayHello makes a POST call to /hello with id, version, and update
-func SayHello(config agent.Config, agentStartTime time.Time) (bool, error) {
+func SayHello(config agent.Config, agentStartTime time.Time) error {
 	helloBody := Hello{
 		ID:      agent.GetMacAddr(),
 		Version: agent.Version,
@@ -64,22 +64,22 @@ func SayHello(config agent.Config, agentStartTime time.Time) (bool, error) {
 	}
 	helloJson, err := json.Marshal(helloBody)
 	if err != nil {
-		return false, fmt.Errorf("unable to marshal json for /hello call")
+		return fmt.Errorf("unable to marshal json for /hello call")
 	}
 
 	resp, err := CallAPI("POST", config.BaseURL+"/hello", string(helloJson), map[string]string{})
 	if err != nil {
-		return false, err
+		return err
 	}
 
 	if resp.StatusCode != 204 {
-		return false, fmt.Errorf("call to /hello did not return 204, got: %v", resp.StatusCode)
+		return fmt.Errorf("call to /hello did not return 204, got: %v", resp.StatusCode)
 	}
 
-	return true, nil
+	return nil
 }
 
-// GetConfig fetches config from
+// GetConfig fetches config from admin api
 func GetConfig(baseURL string) (agent.Config, error) {
 	url := fmt.Sprintf("%s/config/%s", baseURL, agent.GetMacAddr())
 

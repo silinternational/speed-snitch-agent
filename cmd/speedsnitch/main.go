@@ -14,7 +14,7 @@ var agentStartTime time.Time
 func main() {
 	agentStartTime = time.Now()
 	if len(os.Args) < 2 {
-		fmt.Println("You must provide the Admin API BaseURL as the first arguement")
+		fmt.Println("You must provide the Admin API BaseURL as the first argument")
 		os.Exit(1)
 	}
 
