@@ -58,7 +58,7 @@ func SayHello(config agent.Config, agentStartTime time.Time) error {
 	helloBody := Hello{
 		ID:      agent.GetMacAddr(),
 		Version: agent.Version,
-		Uptime:  string(time.Since(agentStartTime) / 1000000 / 60),
+		Uptime:  fmt.Sprintf("%f", time.Since(agentStartTime).Seconds()),
 		OS:      runtime.GOOS,
 		Arch:    runtime.GOARCH,
 	}
