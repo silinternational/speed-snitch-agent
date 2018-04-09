@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"os"
 	"time"
+	"github.com/silinternational/speed-snitch-agent/lib/logentries"
 )
 
 
@@ -25,12 +26,19 @@ func main() {
 	println("Function Tests - main.main")
 
 	startTime := time.Now()
-
-	testLogger := FakeLogger{}
-
 	newLogs := make(chan string, 10000)
 
-	go logqueue.Manager(newLogs, "fakeLogKey", &agent.LoggerInstance{testLogger})
+	logEntriesKey := os.Getenv("LOGENTRIES_KEY")
+
+	if logEntriesKey == "" {
+		println("\n\n *** Just logging to console, since no LOGENTRIES_KEY env variable is available.")
+		testLogger := FakeLogger{}
+		go logqueue.Manager(newLogs, "fakeLogKey", &agent.LoggerInstance{testLogger})
+	} else {
+		logger := agent.LoggerInstance{logentries.Logger{}}
+		go logqueue.Manager(newLogs, logEntriesKey, &agent.LoggerInstance{logger})
+	}
+
 
 	baseURL := "http://fillup.proxy.beeceptor.com"
 	config, err := adminapi.GetConfig(baseURL)
