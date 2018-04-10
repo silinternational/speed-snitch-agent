@@ -14,6 +14,7 @@ const RepoURL = "https://github.com/silinternational/speed-snitch-agent"
 const TypePing = "ping"
 const TypeSpeedTest = "speedTest"
 const Version = "0.0.1"
+const ExeFileName = "speed-snitch-agent.raspi"
 
 type Config struct {
 	BaseURL string `json:"BaseURL"`
