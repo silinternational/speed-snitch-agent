@@ -4,6 +4,7 @@ import (
 	"github.com/silinternational/speed-snitch-agent"
 	"os"
 	"strings"
+	"os/exec"
 )
 
 const DefaultFileMode = 0755
@@ -14,11 +15,15 @@ func UpdateIfNeeded(currentVersion, configVersion, downloadURL string) (bool, er
 
 	if currentVersion != configVersion {
 		wd, _ := os.Getwd()
-		filename := getFilenameFromURL(downloadURL)
-		err := agent.DownloadFile(wd+"/"+filename, downloadURL, DefaultFileMode)
+		wd += "/"
+		newFilename := getFilenameFromURL(downloadURL)
+		err := agent.DownloadFile(wd+newFilename, downloadURL, DefaultFileMode)
 		if err != nil {
 			return false, err
 		}
+
+		cmd := exec.Command("cp", wd+newFilename, wd+agent.ExeFileName)
+		cmd.Run()
 
 		return true, nil
 	}
@@ -31,3 +36,4 @@ func getFilenameFromURL(URL string) string {
 	parts := strings.Split(URL, "/")
 	return parts[len(parts)-1]
 }
+
