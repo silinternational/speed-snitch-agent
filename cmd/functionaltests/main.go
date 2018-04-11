@@ -69,13 +69,15 @@ func main() {
 	)
 
 	sysCron.AddFunc( // Get Config every 3 minutes
-		"*/3 * * * *",
+		"*/2 * * * *",
 		func() {
 			config, err := adminapi.GetConfig(baseURL)
 			if err != nil {
 				fmt.Printf("\nError getting config from %s\n\t%s", baseURL, err.Error())
 				return
 			}
+			newLogs <- "Just ran GetConfig with version " + agent.Version
+
 			tasks.UpdateTasks(config.Tasks, testCron, newLogs)
 
 			wasNeeded, err := selfupdate.UpdateIfNeeded(agent.Version, config.Version.Number, config.Version.URL)
@@ -84,13 +86,7 @@ func main() {
 			} else if wasNeeded {
 				wd, _ := os.Getwd()
 				newLogs <- "Self update was needed. Current working directory: " + wd
-
-				service := "speedSnitchAgent.service"
-				cmd := exec.Command("sudo", "systemctl", "restart", service)
-				err = cmd.Run()
-				if err != nil {
-					newLogs <- "Got error trying to restart " + service + ".\n\t" + err.Error()
-				}
+				newLogs <- logqueue.FlushLogQueue
 			}
 		},
 	)
@@ -116,4 +112,15 @@ func clearCron(thisCron *cron.Cron) {
 		thisCron.Remove(nextEntry.ID)
 	}
 
+}
+
+// RebootRasPi checks if the GOOS is linux and the GOARCH is arm and
+//  if so, executes the reboot command
+func RebootRasPi() {
+	goOS := runtime.GOOS
+	goArch := runtime.GOARCH
+
+	if goOS == "linux" && goArch == "arm"{
+		_ = exec.Command("reboot").Run()
+	}
 }
