@@ -11,6 +11,8 @@ import (
 	"os"
 	"time"
 	"github.com/silinternational/speed-snitch-agent/lib/logentries"
+	"github.com/silinternational/speed-snitch-agent/lib/selfupdate"
+	"os/exec"
 )
 
 
@@ -40,7 +42,8 @@ func main() {
 	}
 
 
-	baseURL := "http://fillup.proxy.beeceptor.com"
+	//baseURL := "http://fillup.proxy.beeceptor.com"
+	baseURL := "http://demo7457258.mockable.io"
 	config, err := adminapi.GetConfig(baseURL)
 
 	if err != nil {
@@ -56,10 +59,12 @@ func main() {
 
 	sysCron := cron.New()
 
-	sysCron.AddFunc( // Say Hello every 15 seconds
-		"*/15 * * * * *",
+	sysCron.AddFunc( // Say Hello 15 seconds past every minute
+		"15 * * * * *",
 		func() {
 			adminapi.SayHello(config, startTime)
+
+			newLogs <- "Just ran Say Hello with version " + agent.Version
 		},
 	)
 
@@ -72,6 +77,21 @@ func main() {
 				return
 			}
 			tasks.UpdateTasks(config.Tasks, testCron, newLogs)
+
+			wasNeeded, err := selfupdate.UpdateIfNeeded(agent.Version, config.Version.Number, config.Version.URL)
+			if err != nil {
+				newLogs <- "Got error trying to self update ...\n\t" + err.Error()
+			} else if wasNeeded {
+				wd, _ := os.Getwd()
+				newLogs <- "Self update was needed. Current working directory: " + wd
+
+				service := "speedSnitchAgent.service"
+				cmd := exec.Command("sudo", "systemctl", "restart", service)
+				err = cmd.Run()
+				if err != nil {
+					newLogs <- "Got error trying to restart " + service + ".\n\t" + err.Error()
+				}
+			}
 		},
 	)
 
