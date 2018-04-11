@@ -22,10 +22,13 @@ func UpdateIfNeeded(currentVersion, configVersion, downloadURL string) (bool, er
 			return false, err
 		}
 
-		cmd := exec.Command("sudo", "cp", "-f", wd+newFilename, wd+agent.ExeFileName)
-		cmd.Run()
+		cmd := exec.Command("cp", "-f", wd+newFilename, wd+agent.ExeFileName)
+		err = cmd.Run()
+		if err != nil {
+			return true, err
+		}
 
-		return true, nil
+		return true, err
 	}
 
 	return false, nil
