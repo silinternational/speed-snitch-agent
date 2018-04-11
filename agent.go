@@ -14,7 +14,7 @@ const RepoURL = "https://github.com/silinternational/speed-snitch-agent"
 const TypePing = "ping"
 const TypeSpeedTest = "speedTest"
 const Version = "0.0.1"
-const ExeFileName = "speed-snitch-agent.raspi"
+const ExeFileName = "agent"
 
 type Config struct {
 	BaseURL string `json:"BaseURL"`
@@ -82,9 +82,17 @@ type LoggerInstance struct {
 // DownloadFile will download a url to a local file. It's efficient because it will
 // write as it downloads and not load the whole file into memory.
 func DownloadFile(filepath string, url string, mode os.FileMode) error {
+	var resp *http.Response
+	var err error
 
 	// Get the data
-	resp, err := http.Get(url)
+	parts := strings.Split(url,"://")
+	if len(parts) >= 2 && parts[0] == "file" {
+		resp, err = GetFileContents(url)
+	} else {
+		resp, err = http.Get(url)
+	}
+
 	if err != nil {
 		return err
 	}
@@ -109,6 +117,15 @@ func DownloadFile(filepath string, url string, mode os.FileMode) error {
 	}
 
 	return nil
+}
+
+
+func GetFileContents(filePath string) (*http.Response, error) {
+
+	t := &http.Transport{}
+	t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+	fileClient := &http.Client{Transport: t}
+	return fileClient.Get(filePath)
 }
 
 // getMacAddr gets the MAC hardware
