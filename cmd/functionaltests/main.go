@@ -105,14 +105,6 @@ func main() {
 
 }
 
-func clearCron(thisCron *cron.Cron) {
-	entries := thisCron.Entries()
-
-	for _, nextEntry := range entries {
-		thisCron.Remove(nextEntry.ID)
-	}
-
-}
 
 // RebootRasPi checks if the GOOS is linux and the GOARCH is arm and
 //  if so, executes the reboot command
