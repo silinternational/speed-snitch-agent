@@ -54,11 +54,11 @@ func CallAPI(method, url, postData string, headers map[string]string) (*http.Res
 }
 
 // SayHello makes a POST call to /hello with id, version, and update
-func SayHello(config agent.Config, agentStartTime time.Time) error {
+func SayHello(apiConfig agent.APIConfig, agentStartTime time.Time) error {
 	helloBody := Hello{
 		ID:      agent.GetMacAddr(),
 		Version: agent.Version,
-		Uptime:  string(time.Since(agentStartTime) / 1000000 / 60),
+		Uptime:  fmt.Sprintf("%v.0", time.Since(agentStartTime).Seconds()),
 		OS:      runtime.GOOS,
 		Arch:    runtime.GOARCH,
 	}
@@ -67,7 +67,7 @@ func SayHello(config agent.Config, agentStartTime time.Time) error {
 		return fmt.Errorf("unable to marshal json for /hello call")
 	}
 
-	resp, err := CallAPI("POST", config.BaseURL+"/hello", string(helloJson), map[string]string{})
+	resp, err := CallAPI("POST", apiConfig.BaseURL+"/hello", string(helloJson), getCallApiHeaders(apiConfig))
 	if err != nil {
 		return err
 	}
@@ -80,19 +80,17 @@ func SayHello(config agent.Config, agentStartTime time.Time) error {
 }
 
 // GetConfig fetches config from admin api
-func GetConfig(baseURL string) (agent.Config, error) {
-	url := fmt.Sprintf("%s/config/%s", baseURL, agent.GetMacAddr())
+func GetConfig(apiConfig agent.APIConfig) (agent.Config, error) {
+	url := fmt.Sprintf("%s/config/%s", apiConfig.BaseURL, agent.GetMacAddr())
 
-	resp, err := CallAPI("GET", url, "", map[string]string{})
+	resp, err := CallAPI("GET", url, "", getCallApiHeaders(apiConfig))
 	if err != nil {
 		return agent.Config{}, err
 	}
 
 	// If successful but empty response, agent is not yet configured so only set BaseURL on config and return
 	if resp.StatusCode == 204 {
-		return agent.Config{
-			BaseURL: baseURL,
-		}, nil
+		return agent.Config{}, nil
 	}
 
 	if resp.StatusCode != 200 {
@@ -110,7 +108,9 @@ func GetConfig(baseURL string) (agent.Config, error) {
 		return agent.Config{}, err
 	}
 
-	config.BaseURL = baseURL
-
 	return config, nil
+}
+
+func getCallApiHeaders(apiConfig agent.APIConfig) map[string]string {
+	return map[string]string{"x-api-key": apiConfig.APIKey}
 }
