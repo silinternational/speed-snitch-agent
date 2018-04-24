@@ -99,6 +99,8 @@ func GetConfig(baseURL string) (agent.Config, error) {
 		return agent.Config{}, fmt.Errorf("unable to get config, got status code %d", resp.StatusCode)
 	}
 
+	defer resp.Body.Close()
+
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return agent.Config{}, err
