@@ -17,6 +17,14 @@ var apiConfig agent.APIConfig
 var config agent.Config
 var agentStartTime time.Time
 
+type FakeLogger struct {
+}
+
+func (f FakeLogger) Process(fakeLogKey, logText string, c ...interface{}) error {
+	print("\n\tProcessing log: " + logText)
+	return nil
+}
+
 func main() {
 	agentStartTime = time.Now()
 	if len(os.Args) < 3 {
@@ -34,6 +42,9 @@ func main() {
 	}
 
 	newLogs := make(chan string, 10000)
+
+	testLogger := FakeLogger{}
+	go logqueue.Manager(newLogs, "fakeLogKey", &agent.LoggerInstance{testLogger})
 
 	taskCron := cron.New()
 	tasks.UpdateTasks(config.Tasks, taskCron, newLogs)

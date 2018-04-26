@@ -14,7 +14,7 @@ import (
 type Hello struct {
 	ID      string `json:"id"`
 	Version string `json:"version"`
-	Uptime  string `json:"uptime"`
+	Uptime  int64  `json:"uptime"`
 	OS      string `json:"os"`
 	Arch    string `json:"arch"`
 }
@@ -58,7 +58,7 @@ func SayHello(apiConfig agent.APIConfig, agentStartTime time.Time) error {
 	helloBody := Hello{
 		ID:      agent.GetMacAddr(),
 		Version: agent.Version,
-		Uptime:  fmt.Sprintf("%v.0", time.Since(agentStartTime).Seconds()),
+		Uptime:  time.Since(agentStartTime).Nanoseconds() / 1000,
 		OS:      runtime.GOOS,
 		Arch:    runtime.GOARCH,
 	}
