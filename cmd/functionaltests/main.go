@@ -43,8 +43,24 @@ func main() {
 
 
 	//baseURL := "http://fillup.proxy.beeceptor.com"
-	baseURL := "http://demo7457258.mockable.io"
-	config, err := adminapi.GetConfig(baseURL)
+	//baseURL := "http://demo7457258.mockable.io"
+	baseURL := "https://ialosahmhh.execute-api.us-east-1.amazonaws.com/dev"
+
+	config := agent.Config{
+		BaseURL: baseURL,
+	}
+
+	err := adminapi.SayHello(config, startTime)
+
+	if err != nil {
+		fmt.Printf("\nError saying Hello to %s\n\t%s", baseURL, err.Error())
+		os.Exit(1)
+	}
+
+	time.Sleep(3*time.Second)
+
+	config, err = adminapi.GetConfig(baseURL)
+
 
 	if err != nil {
 		fmt.Printf("\nError getting config from %s\n\t%s", baseURL, err.Error())
