@@ -20,12 +20,13 @@ func TestSayHello(t *testing.T) {
 		fmt.Fprintf(w, respBody)
 	})
 
-	config := agent.Config{
+	apiConfig := agent.APIConfig{
 		BaseURL: server.URL,
+		APIKey:  "testing",
 	}
 
 	startTime := time.Now()
-	err := SayHello(config, startTime)
+	err := SayHello(apiConfig, startTime)
 	if err != nil {
 		t.Errorf("Failed to say hello, err: %s", err)
 		t.Fail()
@@ -38,7 +39,6 @@ func TestGetConfig(t *testing.T) {
 	server := httptest.NewServer(mux)
 
 	respBody := `{
-  "BaseURL": "https://www.sil.org",
   "Version": {
     "Number": "1.0.0",
     "URL": "https://www.sil.org"
@@ -73,7 +73,12 @@ func TestGetConfig(t *testing.T) {
 		fmt.Fprintf(w, respBody)
 	})
 
-	config, err := GetConfig(server.URL)
+	apiConfig := agent.APIConfig{
+		BaseURL: server.URL,
+		APIKey:  "testing",
+	}
+
+	config, err := GetConfig(apiConfig)
 	if err != nil {
 		t.Errorf(err.Error())
 		t.Fail()
@@ -97,31 +102,22 @@ func TestGetConfigEmptyBody(t *testing.T) {
 		fmt.Fprintf(w, respBody)
 	})
 
-	config, err := GetConfig(server.URL)
+	apiConfig := agent.APIConfig{
+		BaseURL: server.URL,
+		APIKey:  "testing",
+	}
+
+	config, err := GetConfig(apiConfig)
 	if err != nil {
 		t.Errorf(err.Error())
 		t.Fail()
 	}
 
-	expected := agent.Config{
-		BaseURL: server.URL,
-	}
+	expected := agent.Config{}
 
-	if config.BaseURL != expected.BaseURL {
-		t.Errorf("Returned config.BaseURL not what was expected, got %s", config.BaseURL)
+	if config.Version.Number != expected.Version.Number {
+		t.Errorf("Returned config.Version.Number not what was expected, got %s", config.Version.Number)
 		t.Fail()
 	}
 
-	emptyVersion := struct {
-		Number string `json:"Number"`
-		URL    string `json:"URL"`
-	}{
-		Number: "",
-		URL:    "",
-	}
-
-	if config.Version != emptyVersion {
-		t.Errorf("Returned config.Version not what was expected, got %v", config.Version)
-		t.Fail()
-	}
 }

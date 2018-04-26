@@ -58,7 +58,7 @@ func SayHello(apiConfig agent.APIConfig, agentStartTime time.Time) error {
 	helloBody := Hello{
 		ID:      agent.GetMacAddr(),
 		Version: agent.Version,
-		Uptime:  time.Since(agentStartTime).Nanoseconds() / 1000,
+		Uptime:  time.Since(agentStartTime).Nanoseconds() / 1000000,
 		OS:      runtime.GOOS,
 		Arch:    runtime.GOARCH,
 	}
