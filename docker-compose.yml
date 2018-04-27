@@ -1,0 +1,14 @@
+version: "3"
+
+services:
+
+  go:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    environment:
+      GOOS: linux
+    volumes:
+      - ./:/go/src/github.com/silinternational/speed-snitch-agent
+    working_dir: /go/src/github.com/silinternational/speed-snitch-agent
+    command: ["ash"]
