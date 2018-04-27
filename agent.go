@@ -12,7 +12,7 @@ import (
 
 const TypePing = "ping"
 const TypeSpeedTest = "speedTest"
-const Version = "0.0.1"
+const Version = "0.0.2"
 
 type APIConfig struct {
 	BaseURL string
