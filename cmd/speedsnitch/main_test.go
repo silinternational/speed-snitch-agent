@@ -60,7 +60,12 @@ func TestRunLatencyTest(t *testing.T) {
 		fmt.Fprintf(w, respBody)
 	})
 
-	config, _ := adminapi.GetConfig(server.URL)
+	apiConfig := agent.APIConfig{
+		BaseURL: server.URL,
+		APIKey:  "testing",
+	}
+
+	config, _ := adminapi.GetConfig(apiConfig)
 	taskData := config.Tasks[0].Data
 
 	speedster := agent.SpeedTestInstance{speedtestnet.SpeedTestRunner{}}

@@ -15,9 +15,12 @@ const TypePing = "ping"
 const TypeSpeedTest = "speedTest"
 const Version = "0.0.1"
 
-type Config struct {
-	BaseURL string `json:"BaseURL"`
+type APIConfig struct {
+	BaseURL string
+	APIKey  string
+}
 
+type Config struct {
 	Version struct {
 		Number string `json:"Number"`
 		URL    string `json:"URL"`
