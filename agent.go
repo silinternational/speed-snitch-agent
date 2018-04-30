@@ -12,7 +12,8 @@ import (
 
 const TypePing = "ping"
 const TypeSpeedTest = "speedTest"
-const Version = "0.0.2"
+const Version = "0.0.1"
+const ExeFileName = "speedsnitch"
 
 type APIConfig struct {
 	BaseURL string
