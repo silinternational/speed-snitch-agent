@@ -1,0 +1,10 @@
+[Unit]
+Description=speed snitch restarter
+After=ssh.service
+
+[Service]
+Type=oneshot
+ExecStart=/bin/systemctl restart speedSnitchAgent.service
+
+[Install]
+WantedBy=default.target

@@ -1,0 +1,15 @@
+[Unit]
+Description=Go program to run speed tests and report results
+After=ssh.service
+
+[Service]
+User=pi
+Group=pi
+WorkingDirectory=/home/pi/speedsnitch
+Environment=LOGENTRIES_KEY=2aa23451-a0ca-4c2b-99fd-0b782894de9e
+ExecStart=/home/pi/speedsnitch/speedsnitch https://wab5kj63wi.execute-api.us-east-1.amazonaws.com/dev Ex95uAaQ1ZfhvtjIc85Z7CYZrc1aepY8QA6VgSgf
+Type=simple
+Restart=always
+
+[Install]
+WantedBy=default.target
