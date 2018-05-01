@@ -329,6 +329,7 @@ func getTestType(taskData agent.TaskData) (string, error) {
 		CFG_TYPE_ALL,
 		CFG_TYPE_DOWNLOAD,
 		CFG_TYPE_LATENCY,
+		CFG_TYPE_SPEED_TEST,
 		CFG_TYPE_UPLOAD,
 	}
 
