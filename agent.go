@@ -10,11 +10,9 @@ import (
 	"time"
 )
 
-const RepoURL = "https://github.com/silinternational/speed-snitch-agent"
 const TypePing = "ping"
 const TypeSpeedTest = "speedTest"
-const Version = "0.0.1"
-const ExeFileName = "agent"
+const Version = "0.0.2"
 
 type APIConfig struct {
 	BaseURL string

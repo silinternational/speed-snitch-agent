@@ -6,6 +6,23 @@ at remote locations. The agent communicates with a management API to receive con
 This project is in an early prototyping phase though so it is not a fully functional solution yet. There will eventually 
 be `speed-snitch-admin-api` and `speed-snitch-admin-ui` projects as well for the central management capabilities. 
 
+## Build Instructions
+1. Run `make dep`
+2. Build binary (this will create `cmd/speedsnitch/speedsnitch`):
+    - Mac: `make mac`
+    - Linux: `make linux`
+    - Windows: `make windows`
+
+## Release Process
+1. Create new release branch for version number from `develop` following convention `release/x.x.x`
+2. Update source with new version number
+3. Run `make dist`
+4. Commit/push changes
+5. Create PR from `release/x.x.x` to `develop`
+6. After PR reviewed and merged, create PR from `develop` to `master`
+7. Review and merge PR to `master`
+
+
 ## License - MIT
 MIT License
 
