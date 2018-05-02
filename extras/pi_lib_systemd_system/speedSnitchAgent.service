@@ -6,7 +6,9 @@ After=ssh.service
 User=pi
 Group=pi
 WorkingDirectory=/home/pi/speedsnitch
-Environment=LOGENTRIES_KEY=2aa23451-a0ca-4c2b-99fd-0b782894de9e
+
+# Uncomment the following line if you want to do any logging to LogEntries
+#Environment=LOGENTRIES_KEY=replace-this-with-a-real-one
 ExecStart=/home/pi/speedsnitch/speedsnitch https://wab5kj63wi.execute-api.us-east-1.amazonaws.com/dev Ex95uAaQ1ZfhvtjIc85Z7CYZrc1aepY8QA6VgSgf
 Type=simple
 Restart=always
