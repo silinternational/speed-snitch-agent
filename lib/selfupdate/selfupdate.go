@@ -30,12 +30,6 @@ func UpdateIfNeeded(currentVersion, configVersion, downloadURL string) (bool, er
 			return true, fmt.Errorf("Error copying new version of file: %s\n\t%s", execFilePath, err.Error())
 		}
 
-		cmd = exec.Command("chown", "pi:pi", execFilePath)
-		err = cmd.Run()
-		if err != nil {
-			return true, fmt.Errorf("Error changing ownership of new version of executable: %s\n\t%s", execFilePath, err.Error())
-		}
-
 		return true, nil
 	}
 
