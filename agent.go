@@ -12,7 +12,8 @@ import (
 
 const TypePing = "ping"
 const TypeSpeedTest = "speedTest"
-const Version = "0.0.2"
+const Version = "0.0.2.1"
+const ExeFileName = "speedsnitch"
 
 type APIConfig struct {
 	BaseURL string
@@ -127,4 +128,10 @@ func GetMacAddr() string {
 		}
 	}
 	return strings.ToLower(addr)
+}
+
+// GetTimeNow returns the current UTC time in the RFC3339 format
+func GetTimeNow() string {
+	t := time.Now().UTC()
+	return t.Format(time.RFC3339)
 }
