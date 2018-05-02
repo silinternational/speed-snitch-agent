@@ -3,7 +3,6 @@ package logqueue
 import (
 	"github.com/silinternational/speed-snitch-agent"
 	"fmt"
-	"time"
 )
 
 const FlushLogQueue = "flushLogQueue"
@@ -28,12 +27,11 @@ func Manager(
 
 		// If it's not time to flush the queue, append the new log to the queue
 		if newLog != FlushLogQueue {
-			logTime := time.Now().Format("2006-01-02 15:04:05")
 			timedLog := fmt.Sprintf(`{
 "time": "%s",
 "log": "%s"
 }`,
-				logTime,
+				agent.GetTimeNow(),
 				newLog,
 			)
 			logQueue = append(logQueue, timedLog)

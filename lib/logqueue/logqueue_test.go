@@ -4,6 +4,8 @@ import (
 	"testing"
 	"github.com/silinternational/speed-snitch-agent"
 	"time"
+	"encoding/json"
+	"fmt"
 )
 
 var reportedLogs []string
@@ -68,7 +70,19 @@ func TestManager(t *testing.T) {
 		"Log31", "Log32",
 	}
 
-	results := reportedLogs
+	var dat map[string]interface{}
+
+	results := []string{}
+
+	for _, nextRaw := range reportedLogs {
+		err := json.Unmarshal([]byte(nextRaw), &dat)
+		if err != nil {
+			t.Errorf("Could not decode the log: %s", nextRaw)
+			return
+		}
+
+		results = append(results, fmt.Sprintf("%s", dat["log"]))
+	}
 
 	if ! areStringSlicesEqual(expected, results) {
 		t.Fatalf("Did not get back expected logs.\n  Expected: %s\n.    But Got: %s.", expected, results)
