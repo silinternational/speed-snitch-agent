@@ -27,21 +27,22 @@ be `speed-snitch-admin-api` and `speed-snitch-admin-ui` projects as well for the
 On a Raspberry Pi, you can have systemd ensure the speedsnitch executable is always running and
 restarts following an update.
 
-1. Copy (as root) the following files into /lib/systemd/system/ ...
+1. Edit extras/pi_lib_systemd_system/speedSnitchAgent.service to have the correct values.
+2. Copy (as root) the following files into /lib/systemd/system/ ...
     - extras/pi_lib_systemd_system/speedSnitchAgent.service
     - extras/pi_lib_systemd_system/speedSnitchWatcher.service
     - extras/pi_lib_systemd_system/speedSnitchWatcher.path
-2. Create symlinks for these files ...
+3. Create symlinks for these files ...
     $ cd /etc/systemd/system
     $ sudo ln -s /lib/systemd/system/speedSnitchAgent.service speedSnitchAgent.service
     $ sudo ln -s /lib/systemd/system/speedSnitchWatcher.service speedSnitchWatcher.service
     $ sudo ln -s /lib/systemd/system/speedSnitchWatcher.path speedSnitchWatcher.path
-3. Reload the systemd daemons and start the new services
+4. Reload the systemd daemons and start the new services
     $ sudo systemctl daemon-reload
     $ sudo systemctl start speedSnitchWatcher.path
     $ sudo systemctl start speedSnitchWatcher.service
-4. In order to view the status ... $ sudo systemctl status speedSnitchAgent.service
-5. In order to see more lines from its output ... $ journalctl -e -u speedSnitchAgent.service
+5. In order to view the status ... $ sudo systemctl status speedSnitchAgent.service
+6. In order to see more lines from its output ... $ journalctl -e -u speedSnitchAgent.service
 
 
 ## License - MIT

@@ -9,7 +9,7 @@ WorkingDirectory=/home/pi/speedsnitch
 
 # Uncomment the following line if you want to do any logging to LogEntries
 #Environment=LOGENTRIES_KEY=replace-this-with-a-real-one
-ExecStart=/home/pi/speedsnitch/speedsnitch https://wab5kj63wi.execute-api.us-east-1.amazonaws.com/dev Ex95uAaQ1ZfhvtjIc85Z7CYZrc1aepY8QA6VgSgf
+ExecStart=/home/pi/speedsnitch/speedsnitch https://replace-this-with-the-apis-url replace-this-with-the-api-key
 Type=simple
 Restart=always
 
