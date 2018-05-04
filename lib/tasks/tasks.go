@@ -1,11 +1,11 @@
 package tasks
 
 import (
-	"github.com/silinternational/speed-snitch-agent"
-	"gopkg.in/robfig/cron.v2"
-	"github.com/silinternational/speed-snitch-agent/lib/logqueue"
-	"github.com/silinternational/speed-snitch-agent/lib/speedtestnet"
 	"fmt"
+	"github.com/silinternational/speed-snitch-agent"
+	"github.com/silinternational/speed-snitch-agent/lib/speedtestnet"
+	"gopkg.in/robfig/cron.v2"
+	"os"
 )
 
 func clearCron(mainCron *cron.Cron) {
@@ -17,11 +17,10 @@ func clearCron(mainCron *cron.Cron) {
 
 }
 
-
 func UpdateTasks(
 	tasks []agent.Task,
 	mainCron *cron.Cron,
-	newLogs chan string,
+	newLogs chan agent.TaskLogEntry,
 ) {
 	clearCron(mainCron)
 
@@ -31,37 +30,44 @@ func UpdateTasks(
 		case agent.TypePing:
 			mainCron.AddFunc(
 				task.Schedule,
-				func(){
+				func() {
 
 					spdTestRunner := speedtestnet.SpeedTestRunner{}
 					spTestResults, err := spdTestRunner.Run(task.Data)
 					if err != nil {
-						newLogs <- "Error running latency test: " + err.Error()
+						logEntry := agent.GetTaskLogEntry("error")
+						logEntry.ErrorCode = "1525283932"
+						logEntry.ErrorMessage = "Error running latency test: " + err.Error()
+						newLogs <- logEntry
+						fmt.Fprint(os.Stdout, logEntry)
 					} else {
-						newLogs <- fmt.Sprintf("Latency Results: %f milliseconds", spTestResults.Latency.Seconds() * 1000)
+						logEntry := agent.GetTaskLogEntry("latency")
+						logEntry.Latency = spTestResults.Latency.Seconds() * 1000
+						logEntry.ServerID = task.Data.IntValues["serverID"]
+						newLogs <- logEntry
+						fmt.Fprint(os.Stdout, logEntry)
 					}
 				},
 			)
 		case agent.TypeSpeedTest:
 			mainCron.AddFunc(
 				task.Schedule,
-				func(){
+				func() {
 
 					spdTestRunner := speedtestnet.SpeedTestRunner{}
 					spTestResults, err := spdTestRunner.Run(task.Data)
 					if err != nil {
-						newLogs <- "Error running speed test: " + err.Error()
+						logEntry := agent.GetTaskLogEntry("error")
+						logEntry.ErrorCode = "1525291938"
+						logEntry.ErrorMessage = "Error running speed test: " + err.Error()
+						newLogs <- logEntry
 					} else {
-						newLogs <- fmt.Sprintf("Download Results: %f Mb/sec", spTestResults.Download)
-						newLogs <- fmt.Sprintf("Upload Results: %f Mb/sec", spTestResults.Upload)
+						logEntry := agent.GetTaskLogEntry("latency")
+						logEntry.Download = spTestResults.Download
+						logEntry.Upload = spTestResults.Upload
+						logEntry.ServerID = task.Data.IntValues["serverID"]
+						newLogs <- logEntry
 					}
-				},
-			)
-		case logqueue.FlushLogQueue:
-			mainCron.AddFunc(
-				task.Schedule,
-				func(){
-					newLogs <- logqueue.FlushLogQueue
 				},
 			)
 		}

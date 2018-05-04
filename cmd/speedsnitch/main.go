@@ -14,16 +14,7 @@ import (
 )
 
 var apiConfig agent.APIConfig
-var config agent.Config
 var agentStartTime time.Time
-
-type FakeLogger struct {
-}
-
-func (f FakeLogger) Process(fakeLogKey, logText string, c ...interface{}) error {
-	print("\n\tProcessing log: " + logText)
-	return nil
-}
 
 func main() {
 	agentStartTime = time.Now()
@@ -41,10 +32,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	newLogs := make(chan string, 10000)
+	newLogs := make(chan agent.TaskLogEntry, 10000)
 
-	testLogger := FakeLogger{}
-	go logqueue.Manager(newLogs, "fakeLogKey", &agent.LoggerInstance{testLogger})
+	go logqueue.Manager(apiConfig, newLogs)
 
 	taskCron := cron.New()
 	tasks.UpdateTasks(config.Tasks, taskCron, newLogs)
@@ -57,7 +47,7 @@ func main() {
 		func() {
 			adminapi.SayHello(apiConfig, agentStartTime)
 
-			newLogs <- "Just ran Say Hello with version " + agent.Version
+			fmt.Println("Just ran Say Hello with version " + agent.Version)
 		},
 	)
 
@@ -69,25 +59,17 @@ func main() {
 				fmt.Printf("\nError getting config from %s\n\t%s", apiConfig.BaseURL, err.Error())
 				return
 			}
-			newLogs <- "Just ran GetConfig with version " + agent.Version
+			fmt.Println("Just ran GetConfig with version " + agent.Version)
 
 			tasks.UpdateTasks(config.Tasks, taskCron, newLogs)
 
 			wasNeeded, err := selfupdate.UpdateIfNeeded(agent.Version, config.Version.Number, config.Version.URL)
 			if err != nil {
-				newLogs <- "Got error trying to self update ...\n\t" + err.Error()
+				fmt.Println("Got error trying to self update ...\n\t" + err.Error())
 			} else if wasNeeded {
 				wd, _ := os.Getwd()
-				newLogs <- "Self update was needed. Current working directory: " + wd
-				newLogs <- logqueue.FlushLogQueue
+				fmt.Println("Self update was needed. Current working directory: " + wd)
 			}
-		},
-	)
-
-	sysCron.AddFunc( // Flush log every minute
-		"* * * * *",
-		func() {
-			newLogs <- logqueue.FlushLogQueue
 		},
 	)
 
