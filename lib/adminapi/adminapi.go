@@ -136,6 +136,12 @@ func Log(apiConfig agent.APIConfig, logEntry agent.TaskLogEntry) error {
 
 	url := fmt.Sprintf("%s/log/%s/%s", apiConfig.BaseURL, agent.GetMacAddr(), logEntry.EntryType)
 	resp, err := CallAPI("POST", url, string(logEntryJson), getCallApiHeaders(apiConfig))
+
+	// If there is an error, then resp won't be usable below
+	if err != nil {
+		return err
+	}
+
 	fmt.Fprintf(os.Stdout, "log api call response: "+resp.Status)
-	return err
+	return nil
 }
