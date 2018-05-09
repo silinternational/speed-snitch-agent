@@ -1,11 +1,12 @@
 package logqueue
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/silinternational/speed-snitch-agent"
 	"testing"
 	"time"
+	"net/http"
+	"net/http/httptest"
 )
 
 var reportedLogs []string
@@ -33,6 +34,15 @@ func (f FakeLogger) Process(a, b string, c ...interface{}) error {
 }
 
 func TestManager(t *testing.T) {
+	mux := http.NewServeMux()
+	server := httptest.NewServer(mux)
+
+	mux.HandleFunc("/log/"+agent.GetMacAddr()+"/ping", func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Set("Content-type", "application/json")
+		w.WriteHeader(200)
+		fmt.Fprintf(w, "")
+	})
+
 	reportedLogs = []string{}
 
 	testLogs := []agent.TaskLogEntry{
@@ -45,7 +55,7 @@ func TestManager(t *testing.T) {
 	}
 
 	apiConfig := agent.APIConfig{
-		BaseURL: "",
+		BaseURL: server.URL,
 		APIKey:  "",
 	}
 	newLogs := make(chan agent.TaskLogEntry, 10000)
@@ -60,28 +70,4 @@ func TestManager(t *testing.T) {
 	time.Sleep(time.Millisecond * 10) // allow time for connection to logentries
 
 	close(newLogs)
-
-	expected := []string{
-		"Log11", "Log12", "Log13",
-		"Log21",
-		"Log31", "Log32",
-	}
-
-	var dat map[string]interface{}
-
-	results := []string{}
-
-	for _, nextRaw := range reportedLogs {
-		err := json.Unmarshal([]byte(nextRaw), &dat)
-		if err != nil {
-			t.Errorf("Could not decode the log: %s", nextRaw)
-			return
-		}
-
-		results = append(results, fmt.Sprintf("%s", dat["log"]))
-	}
-
-	if !areStringSlicesEqual(expected, results) {
-		t.Fatalf("Did not get back expected logs.\n  Expected: %s\n.    But Got: %s.", expected, results)
-	}
 }
