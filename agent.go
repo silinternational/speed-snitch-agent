@@ -118,16 +118,28 @@ func DownloadFile(filepath string, url string, mode os.FileMode) error {
 func GetMacAddr() string {
 	addr := ""
 	interfaces, err := net.Interfaces()
+	foundAddress := false
+	lowestAddress := ""
+
 	if err == nil {
 		for _, i := range interfaces {
-			if i.Flags&net.FlagUp != 0 && bytes.Compare(i.HardwareAddr, nil) != 0 {
+			if bytes.Compare(i.HardwareAddr, nil) != 0 {
 				// Don't use random as we have a real address
 				addr = i.HardwareAddr.String()
-				break
+				if ! foundAddress {
+					foundAddress = true
+					lowestAddress = addr
+					continue
+				}
+
+				if addr < lowestAddress {
+					lowestAddress = addr
+				}
+
 			}
 		}
 	}
-	return strings.ToLower(addr)
+	return strings.ToLower(lowestAddress)
 }
 
 // GetTimeNow returns the current UTC time in the RFC3339 format
