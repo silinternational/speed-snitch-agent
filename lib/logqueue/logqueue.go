@@ -1,47 +1,32 @@
 package logqueue
 
 import (
-	"github.com/silinternational/speed-snitch-agent"
 	"fmt"
+	"github.com/silinternational/speed-snitch-agent"
+	"github.com/silinternational/speed-snitch-agent/lib/adminapi"
+	"os"
 )
 
-const FlushLogQueue = "flushLogQueue"
-
 type TestTracker struct {
-	KeepTrack bool
+	KeepTrack    bool
 	ReportedLogs []string
 }
 
-
-// Manager listens to the newLogs channel and stores them as they come in.
-// When a new log comes through with flushLogQueue as its value, then
-//  it processes all the logs in its store and removes them.
-func Manager(
-	newLogs chan string,
-	logServiceKey string,
-	logger *agent.LoggerInstance,
-) {
-	logQueue := []string{}
+func Manager(apiConfig agent.APIConfig, newLogs chan agent.TaskLogEntry) {
+	logQueue := []agent.TaskLogEntry{}
 
 	for newLog := range newLogs {
 
-		// If it's not time to flush the queue, append the new log to the queue
-		if newLog != FlushLogQueue {
-			timedLog := fmt.Sprintf(`{
-"time": "%s",
-"log": "%s"
-}`,
-				agent.GetTimeNow(),
-				newLog,
-			)
-			logQueue = append(logQueue, timedLog)
-			continue
-		}
+		logQueue = append(logQueue, newLog)
+		retryQueue := []agent.TaskLogEntry{}
 
-		// Otherwise, flush the queue
 		for _, nextLog := range logQueue {
-			_ = logger.Process(logServiceKey, nextLog)
+			err := adminapi.Log(apiConfig, nextLog)
+			if err != nil {
+				retryQueue = append(retryQueue, newLog)
+				fmt.Fprint(os.Stderr, err.Error())
+			}
 		}
-		logQueue = []string{}
+		logQueue = retryQueue
 	}
 }

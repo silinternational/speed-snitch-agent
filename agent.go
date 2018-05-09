@@ -12,6 +12,7 @@ import (
 
 const TypePing = "ping"
 const TypeSpeedTest = "speedTest"
+const TypeError = "error"
 const Version = "0.0.2.1"
 const ExeFileName = "speedsnitch"
 
@@ -46,6 +47,17 @@ type TaskData struct {
 	IntValues    map[string]int     `json:"IntValues"`
 	FloatValues  map[string]float64 `json:"FloatValues"`
 	IntSlices    map[string][]int   `json:"IntSlices"`
+}
+
+type TaskLogEntry struct {
+	Timestamp    int64   `json:"Timestamp"`
+	EntryType    string  `json:"EntryType"`
+	ServerID     int     `json:"ServerID,omitempty"`
+	Upload       float64 `json:"Upload,omitempty"`
+	Download     float64 `json:"Download,omitempty"`
+	Latency      float64 `json:"Latency,omitempty"`
+	ErrorCode    string  `json:"ErrorCode,omitempty"`
+	ErrorMessage string  `json:"ErrorMessage,omitempty"`
 }
 
 type SpeedTestResults struct {
@@ -134,4 +146,11 @@ func GetMacAddr() string {
 func GetTimeNow() string {
 	t := time.Now().UTC()
 	return t.Format(time.RFC3339)
+}
+
+func GetTaskLogEntry(entryType string) TaskLogEntry {
+	return TaskLogEntry{
+		Timestamp: time.Now().UTC().Unix(),
+		EntryType: entryType,
+	}
 }
