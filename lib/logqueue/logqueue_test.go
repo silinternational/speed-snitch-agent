@@ -1,11 +1,11 @@
 package logqueue
 
 import (
-	"testing"
-	"github.com/silinternational/speed-snitch-agent"
-	"time"
 	"encoding/json"
 	"fmt"
+	"github.com/silinternational/speed-snitch-agent"
+	"testing"
+	"time"
 )
 
 var reportedLogs []string
@@ -24,7 +24,6 @@ func areStringSlicesEqual(slc1, slc2 []string) bool {
 	return true
 }
 
-
 type FakeLogger struct {
 }
 
@@ -33,27 +32,25 @@ func (f FakeLogger) Process(a, b string, c ...interface{}) error {
 	return nil
 }
 
-
 func TestManager(t *testing.T) {
 	reportedLogs = []string{}
-	testLogger := FakeLogger{}
 
-	testLogs := []string {
-		"Log11",
-		"Log12",
-		"Log13",
-		FlushLogQueue,
-		"Log21",
-		FlushLogQueue,
-		"Log31",
-		"Log32",
-		FlushLogQueue,
-		FlushLogQueue,
+	testLogs := []agent.TaskLogEntry{
+		{
+			EntryType: agent.TypePing,
+			Latency:   12.123,
+			Timestamp: 1525877951,
+			ServerID:  1234,
+		},
 	}
 
-	newLogs := make(chan string, 10000)
+	apiConfig := agent.APIConfig{
+		BaseURL: "",
+		APIKey:  "",
+	}
+	newLogs := make(chan agent.TaskLogEntry, 10000)
 
-	go Manager(newLogs, "fakeLogKey", &agent.LoggerInstance{testLogger})
+	go Manager(apiConfig, newLogs)
 
 	for _, nextLog := range testLogs {
 		newLogs <- nextLog
@@ -64,7 +61,7 @@ func TestManager(t *testing.T) {
 
 	close(newLogs)
 
-	expected := []string {
+	expected := []string{
 		"Log11", "Log12", "Log13",
 		"Log21",
 		"Log31", "Log32",
@@ -84,7 +81,7 @@ func TestManager(t *testing.T) {
 		results = append(results, fmt.Sprintf("%s", dat["log"]))
 	}
 
-	if ! areStringSlicesEqual(expected, results) {
+	if !areStringSlicesEqual(expected, results) {
 		t.Fatalf("Did not get back expected logs.\n  Expected: %s\n.    But Got: %s.", expected, results)
 	}
 }

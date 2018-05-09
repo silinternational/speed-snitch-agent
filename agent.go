@@ -12,6 +12,7 @@ import (
 
 const TypePing = "ping"
 const TypeSpeedTest = "speedTest"
+const TypeError = "error"
 const Version = "0.0.2.1"
 const ExeFileName = "speedsnitch"
 

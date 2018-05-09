@@ -35,13 +35,13 @@ func UpdateTasks(
 					spdTestRunner := speedtestnet.SpeedTestRunner{}
 					spTestResults, err := spdTestRunner.Run(task.Data)
 					if err != nil {
-						logEntry := agent.GetTaskLogEntry("error")
+						logEntry := agent.GetTaskLogEntry(agent.TypeError)
 						logEntry.ErrorCode = "1525283932"
 						logEntry.ErrorMessage = "Error running latency test: " + err.Error()
 						newLogs <- logEntry
 						fmt.Fprint(os.Stdout, logEntry)
 					} else {
-						logEntry := agent.GetTaskLogEntry("latency")
+						logEntry := agent.GetTaskLogEntry(agent.TypePing)
 						logEntry.Latency = spTestResults.Latency.Seconds() * 1000
 						logEntry.ServerID = task.Data.IntValues["serverID"]
 						newLogs <- logEntry
@@ -57,12 +57,12 @@ func UpdateTasks(
 					spdTestRunner := speedtestnet.SpeedTestRunner{}
 					spTestResults, err := spdTestRunner.Run(task.Data)
 					if err != nil {
-						logEntry := agent.GetTaskLogEntry("error")
+						logEntry := agent.GetTaskLogEntry(agent.TypeError)
 						logEntry.ErrorCode = "1525291938"
 						logEntry.ErrorMessage = "Error running speed test: " + err.Error()
 						newLogs <- logEntry
 					} else {
-						logEntry := agent.GetTaskLogEntry("latency")
+						logEntry := agent.GetTaskLogEntry(agent.TypeSpeedTest)
 						logEntry.Download = spTestResults.Download
 						logEntry.Upload = spTestResults.Upload
 						logEntry.ServerID = task.Data.IntValues["serverID"]

@@ -27,7 +27,6 @@ func Manager(apiConfig agent.APIConfig, newLogs chan agent.TaskLogEntry) {
 			if err != nil {
 				retryQueue = append(retryQueue, newLog)
 				fmt.Fprint(os.Stderr, err.Error())
-				logQueue = append(logQueue, nextLog)
 			}
 		}
 		logQueue = retryQueue
