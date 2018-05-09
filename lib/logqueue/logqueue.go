@@ -7,8 +7,6 @@ import (
 	"os"
 )
 
-const FlushLogQueue = "flushLogQueue"
-
 type TestTracker struct {
 	KeepTrack    bool
 	ReportedLogs []string
