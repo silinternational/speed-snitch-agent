@@ -113,25 +113,17 @@ func DownloadFile(filepath string, url string, mode os.FileMode) error {
 	return nil
 }
 
-// getMacAddr gets the MAC hardware
+// getMacAddr gets the lowest (alphabetically) MAC hardware
 // address of the host machine
 func GetMacAddr() string {
 	addr := ""
 	interfaces, err := net.Interfaces()
-	foundAddress := false
-	lowestAddress := ""
+	lowestAddress := "zz:zz:zz:zz:zz:zz"
 
 	if err == nil {
 		for _, i := range interfaces {
 			if bytes.Compare(i.HardwareAddr, nil) != 0 {
-				// Don't use random as we have a real address
 				addr = i.HardwareAddr.String()
-				if ! foundAddress {
-					foundAddress = true
-					lowestAddress = addr
-					continue
-				}
-
 				if addr < lowestAddress {
 					lowestAddress = addr
 				}
