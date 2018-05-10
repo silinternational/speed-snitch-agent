@@ -8,6 +8,9 @@ import (
 	"os"
 	"strings"
 	"time"
+	"bufio"
+	"golang.org/x/crypto/openpgp"
+	"fmt"
 )
 
 const TypePing = "ping"
@@ -15,6 +18,11 @@ const TypeSpeedTest = "speedTest"
 const TypeError = "error"
 const Version = "0.0.2.1"
 const ExeFileName = "speedsnitch"
+
+const ConfigPath = "/boot/AppConfig"
+const ConfigFileName = "speedsnitch.txt"
+
+const GPGKeyFileName = "gpg.pubkey"
 
 type APIConfig struct {
 	BaseURL string
@@ -157,4 +165,72 @@ func GetTaskLogEntry(entryType string) TaskLogEntry {
 		Timestamp: time.Now().UTC().Unix(),
 		EntryType: entryType,
 	}
+}
+
+// GetAppConfig accepts an io.Reader for testing purposes.
+//  If the io.Reader param is nil, then it uses the default
+//  config file to provide an custom APIConfig
+func GetAppConfig(reader io.Reader) APIConfig {
+	apiConfig := APIConfig{}
+
+	// If no (test) reader is provided, get the default config file as the reader
+	if reader == nil {
+		configFilePath := ConfigPath + "/" + ConfigFileName
+		var err error
+		reader, err = os.Open(configFilePath)
+		if err != nil {
+			return apiConfig
+		}
+	}
+
+	scanner := bufio.NewScanner(reader)
+	scanner.Split(bufio.ScanWords)
+
+
+	scanner.Scan()
+	apiConfig.BaseURL = scanner.Text()
+
+	scanner.Scan()
+	apiConfig.APIKey = scanner.Text()
+
+	return apiConfig
+}
+
+
+// VerifyFileSignature only checks the signature of the target file if there is a gpg key to use
+func VerifyFileSignature(directory, targetFile, signedFile string) error {
+	keyFilePath := ConfigPath + "/" + GPGKeyFileName
+
+	// If there is no key, then don't try to verify it
+	_, err := os.Stat(keyFilePath)
+	if os.IsNotExist(err) {
+		return nil
+	}
+
+	keyRingReader, err := os.Open(keyFilePath)
+	if err != nil {
+		return err
+	}
+
+	signature, err := os.Open(signedFile)
+	if err != nil {
+		return err
+	}
+
+	verificationTarget, err := os.Open(targetFile)
+	if err != nil {
+		return err
+	}
+
+	keyring, err := openpgp.ReadArmoredKeyRing(keyRingReader)
+	if err != nil {
+		return fmt.Errorf("Error Reading Armored Key Ring: %s", err.Error())
+	}
+
+	_, err = openpgp.CheckArmoredDetachedSignature(keyring, verificationTarget, signature)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
