@@ -167,6 +167,22 @@ func GetTaskLogEntry(entryType string) TaskLogEntry {
 	}
 }
 
+func getCustomAppConfigPath() string {
+	paths := []string{
+		"C:/ProgramData/speedsnitch/AppConfig",
+		"/boot/AppConfig",
+		"~/Library/speedsnitch/AppConfig",
+	}
+
+	for _, path := range paths {
+		_, err := os.Stat(path)
+		if err == nil {
+			return path
+		}
+	}
+	return ""
+}
+
 // GetAppConfig accepts an io.Reader for testing purposes.
 //  If the io.Reader param is nil, then it uses the default
 //  config file to provide an custom APIConfig
@@ -175,7 +191,12 @@ func GetAppConfig(reader io.Reader) APIConfig {
 
 	// If no (test) reader is provided, get the default config file as the reader
 	if reader == nil {
-		configFilePath := ConfigPath + "/" + ConfigFileName
+		configPath := getCustomAppConfigPath()
+		if configPath == "" {
+			return apiConfig
+		}
+		
+		configFilePath := configPath + "/" + ConfigFileName
 		var err error
 		reader, err = os.Open(configFilePath)
 		if err != nil {
@@ -198,20 +219,7 @@ func GetAppConfig(reader io.Reader) APIConfig {
 
 
 // VerifyFileSignature only checks the signature of the target file if there is a gpg key to use
-func VerifyFileSignature(directory, targetFile, signedFile string) error {
-	keyFilePath := ConfigPath + "/" + GPGKeyFileName
-
-	// If there is no key, then don't try to verify it
-	_, err := os.Stat(keyFilePath)
-	if os.IsNotExist(err) {
-		return nil
-	}
-
-	keyRingReader, err := os.Open(keyFilePath)
-	if err != nil {
-		return err
-	}
-
+func VerifyFileSignature(directory, targetFile, signedFile string, keys []io.Reader) error {
 	signature, err := os.Open(signedFile)
 	if err != nil {
 		return err
@@ -222,15 +230,18 @@ func VerifyFileSignature(directory, targetFile, signedFile string) error {
 		return err
 	}
 
-	keyring, err := openpgp.ReadArmoredKeyRing(keyRingReader)
-	if err != nil {
-		return fmt.Errorf("Error Reading Armored Key Ring: %s", err.Error())
+	for _, keyReader := range keys {
+
+		keyring, err := openpgp.ReadArmoredKeyRing(keyReader)
+		if err != nil {
+			continue
+		}
+
+		_, err = openpgp.CheckArmoredDetachedSignature(keyring, verificationTarget, signature)
+		if err == nil {
+			return nil
+		}
 	}
 
-	_, err = openpgp.CheckArmoredDetachedSignature(keyring, verificationTarget, signature)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return fmt.Errorf("None of the current keys are able to verify the signature.")
 }

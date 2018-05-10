@@ -35,7 +35,8 @@ func UpdateIfNeeded(
 				return false, fmt.Errorf("Error downloading signed file: %s", err.Error())
 			}
 
-			err = agent.VerifyFileSignature(wd, downloadFile, signedFile)
+			publicKeys := getPublicKeys()
+			err = agent.VerifyFileSignature(wd, downloadFile, signedFile, publicKeys)
 			if err != nil {
 				return false, fmt.Errorf("Error verifying the binary's signature: %s", err.Error())
 			}
