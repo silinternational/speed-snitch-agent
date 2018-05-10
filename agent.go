@@ -136,7 +136,7 @@ func DownloadFile(filepath string, url string, mode os.FileMode) error {
 func GetMacAddr() string {
 	addr := ""
 	interfaces, err := net.Interfaces()
-	lowestAddress := "zz:zz:zz:zz:zz:zz"
+	lowestAddress := "ZZ:ZZ:ZZ:ZZ:ZZ:ZZ"
 
 	if err == nil {
 		for _, i := range interfaces {
