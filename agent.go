@@ -193,9 +193,12 @@ func getCustomAppConfigPath() string {
 	for _, path := range paths {
 		_, err := os.Stat(path)
 		if err == nil {
+			println("\nFound config file path: " + path)
 			return path
 		}
 	}
+
+	println("\nDid not find config path")
 	return ""
 }
 
@@ -230,6 +233,7 @@ func GetAppConfig(reader io.Reader) APIConfig {
 	scanner.Scan()
 	apiConfig.APIKey = scanner.Text()
 
+	println("\nFound custom config: " + apiConfig.BaseURL + " ... " + apiConfig.APIKey)
 	return apiConfig
 }
 
