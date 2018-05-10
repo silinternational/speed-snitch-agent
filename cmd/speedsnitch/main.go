@@ -29,6 +29,8 @@ func main() {
 	customApiConfig := agent.GetAppConfig(nil)
 	if customApiConfig.BaseURL != "" && customApiConfig.APIKey != "" {
 		apiConfig = customApiConfig
+
+		fmt.Println("Using Custom ApiConfig with BaseURL: %s", apiConfig.BaseURL)
 	}
 
 	config, err := adminapi.GetConfig(apiConfig)
