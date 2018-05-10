@@ -19,10 +19,8 @@ const TypeError = "error"
 const Version = "0.0.2.1"
 const ExeFileName = "speedsnitch"
 
-const ConfigPath = "/boot/AppConfig"
 const ConfigFileName = "speedsnitch.txt"
 
-const GPGKeyFileName = "gpg.pubkey"
 
 type APIConfig struct {
 	BaseURL string
