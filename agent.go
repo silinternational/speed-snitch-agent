@@ -141,6 +141,14 @@ func DownloadFile(filepath string, url string, mode os.FileMode) error {
 	return nil
 }
 
+func GetFileContents(filePath string) (*http.Response, error) {
+
+	t := &http.Transport{}
+	t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
+	fileClient := &http.Client{Transport: t}
+	return fileClient.Get(filePath)
+}
+
 // getMacAddr gets the lowest (alphabetically) MAC hardware
 // address of the host machine
 func GetMacAddr() string {
