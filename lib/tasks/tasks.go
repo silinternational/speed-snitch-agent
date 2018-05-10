@@ -22,13 +22,13 @@ func UpdateTasks(
 	mainCron *cron.Cron,
 	newLogs chan agent.TaskLogEntry,
 ) {
-	clearCron(taskCron)
+	clearCron(mainCron)
 
 	for index, _ := range tasks {
 		task := tasks[index] // Have to do it this way, in order to use it in the closures
 		switch task.Type {
 		case agent.TypePing:
-			taskCron.AddFunc(
+			mainCron.AddFunc(
 				task.Schedule,
 				func() {
 
@@ -50,7 +50,7 @@ func UpdateTasks(
 				},
 			)
 		case agent.TypeSpeedTest:
-			taskCron.AddFunc(
+			mainCron.AddFunc(
 				task.Schedule,
 				func() {
 
