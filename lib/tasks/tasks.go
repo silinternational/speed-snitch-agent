@@ -1,10 +1,11 @@
 package tasks
 
 import (
-	"github.com/silinternational/speed-snitch-agent"
-	"gopkg.in/robfig/cron.v2"
-	"github.com/silinternational/speed-snitch-agent/lib/speedtestnet"
 	"fmt"
+	"github.com/silinternational/speed-snitch-agent"
+	"github.com/silinternational/speed-snitch-agent/lib/speedtestnet"
+	"gopkg.in/robfig/cron.v2"
+	"os"
 )
 
 func clearCron(mainCron *cron.Cron) {
@@ -18,8 +19,8 @@ func clearCron(mainCron *cron.Cron) {
 
 func UpdateTasks(
 	tasks []agent.Task,
-	taskCron *cron.Cron,
-	newLogs chan string,
+	mainCron *cron.Cron,
+	newLogs chan agent.TaskLogEntry,
 ) {
 	clearCron(taskCron)
 
@@ -34,9 +35,17 @@ func UpdateTasks(
 					spdTestRunner := speedtestnet.SpeedTestRunner{}
 					spTestResults, err := spdTestRunner.Run(task.Data)
 					if err != nil {
-						newLogs <- "Error running latency test: " + err.Error()
+						logEntry := agent.GetTaskLogEntry(agent.TypeError)
+						logEntry.ErrorCode = "1525283932"
+						logEntry.ErrorMessage = "Error running latency test: " + err.Error()
+						newLogs <- logEntry
+						fmt.Fprint(os.Stdout, logEntry)
 					} else {
-						newLogs <- fmt.Sprintf("Latency Results: %f milliseconds", spTestResults.Latency.Seconds()*1000)
+						logEntry := agent.GetTaskLogEntry(agent.TypePing)
+						logEntry.Latency = spTestResults.Latency.Seconds() * 1000
+						logEntry.ServerID = task.Data.IntValues["serverID"]
+						newLogs <- logEntry
+						fmt.Fprint(os.Stdout, logEntry)
 					}
 				},
 			)
@@ -48,11 +57,16 @@ func UpdateTasks(
 					spdTestRunner := speedtestnet.SpeedTestRunner{}
 					spTestResults, err := spdTestRunner.Run(task.Data)
 					if err != nil {
-						newLogs <- "Error running speed test: " + err.Error()
+						logEntry := agent.GetTaskLogEntry(agent.TypeError)
+						logEntry.ErrorCode = "1525291938"
+						logEntry.ErrorMessage = "Error running speed test: " + err.Error()
+						newLogs <- logEntry
 					} else {
-						newLogs <- fmt.Sprintf("Latency Results: %f milliseconds", spTestResults.Latency.Seconds()*1000)
-						newLogs <- fmt.Sprintf("Download Results: %f Mb/sec", spTestResults.Download)
-						newLogs <- fmt.Sprintf("Upload Results: %f Mb/sec", spTestResults.Upload)
+						logEntry := agent.GetTaskLogEntry(agent.TypeSpeedTest)
+						logEntry.Download = spTestResults.Download
+						logEntry.Upload = spTestResults.Upload
+						logEntry.ServerID = task.Data.IntValues["serverID"]
+						newLogs <- logEntry
 					}
 				},
 			)

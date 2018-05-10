@@ -8,11 +8,21 @@ import (
 	"os"
 	"strings"
 	"time"
+	"bufio"
+	"golang.org/x/crypto/openpgp"
+	"fmt"
 )
 
 const TypePing = "ping"
 const TypeSpeedTest = "speedTest"
-const Version = "0.0.2"
+const TypeError = "error"
+const Version = "0.0.2.1"
+const ExeFileName = "speedsnitch"
+
+const ConfigPath = "/boot/AppConfig"
+const ConfigFileName = "speedsnitch.txt"
+
+const GPGKeyFileName = "gpg.pubkey"
 
 type APIConfig struct {
 	BaseURL string
@@ -45,6 +55,17 @@ type TaskData struct {
 	IntValues    map[string]int     `json:"IntValues"`
 	FloatValues  map[string]float64 `json:"FloatValues"`
 	IntSlices    map[string][]int   `json:"IntSlices"`
+}
+
+type TaskLogEntry struct {
+	Timestamp    int64   `json:"Timestamp"`
+	EntryType    string  `json:"EntryType"`
+	ServerID     int     `json:"ServerID,omitempty"`
+	Upload       float64 `json:"Upload,omitempty"`
+	Download     float64 `json:"Download,omitempty"`
+	Latency      float64 `json:"Latency,omitempty"`
+	ErrorCode    string  `json:"ErrorCode,omitempty"`
+	ErrorMessage string  `json:"ErrorMessage,omitempty"`
 }
 
 type SpeedTestResults struct {
@@ -120,28 +141,115 @@ func DownloadFile(filepath string, url string, mode os.FileMode) error {
 	return nil
 }
 
-
-func GetFileContents(filePath string) (*http.Response, error) {
-
-	t := &http.Transport{}
-	t.RegisterProtocol("file", http.NewFileTransport(http.Dir("/")))
-	fileClient := &http.Client{Transport: t}
-	return fileClient.Get(filePath)
-}
-
-// getMacAddr gets the MAC hardware
+// getMacAddr gets the lowest (alphabetically) MAC hardware
 // address of the host machine
 func GetMacAddr() string {
 	addr := ""
 	interfaces, err := net.Interfaces()
+	lowestAddress := "zz:zz:zz:zz:zz:zz"
+
 	if err == nil {
 		for _, i := range interfaces {
-			if i.Flags&net.FlagUp != 0 && bytes.Compare(i.HardwareAddr, nil) != 0 {
-				// Don't use random as we have a real address
+			if bytes.Compare(i.HardwareAddr, nil) != 0 {
 				addr = i.HardwareAddr.String()
-				break
+				if addr < lowestAddress {
+					lowestAddress = addr
+				}
+
 			}
 		}
 	}
-	return strings.ToLower(addr)
+	return strings.ToLower(lowestAddress)
+}
+
+// GetTimeNow returns the current UTC time in the RFC3339 format
+func GetTimeNow() string {
+	t := time.Now().UTC()
+	return t.Format(time.RFC3339)
+}
+
+func GetTaskLogEntry(entryType string) TaskLogEntry {
+	return TaskLogEntry{
+		Timestamp: time.Now().UTC().Unix(),
+		EntryType: entryType,
+	}
+}
+
+func getCustomAppConfigPath() string {
+	paths := []string{
+		"C:/ProgramData/speedsnitch/AppConfig",
+		"/boot/AppConfig",
+		"~/Library/speedsnitch/AppConfig",
+	}
+
+	for _, path := range paths {
+		_, err := os.Stat(path)
+		if err == nil {
+			return path
+		}
+	}
+	return ""
+}
+
+// GetAppConfig accepts an io.Reader for testing purposes.
+//  If the io.Reader param is nil, then it uses the default
+//  config file to provide an custom APIConfig
+func GetAppConfig(reader io.Reader) APIConfig {
+	apiConfig := APIConfig{}
+
+	// If no (test) reader is provided, get the default config file as the reader
+	if reader == nil {
+		configPath := getCustomAppConfigPath()
+		if configPath == "" {
+			return apiConfig
+		}
+		
+		configFilePath := configPath + "/" + ConfigFileName
+		var err error
+		reader, err = os.Open(configFilePath)
+		if err != nil {
+			return apiConfig
+		}
+	}
+
+	scanner := bufio.NewScanner(reader)
+	scanner.Split(bufio.ScanWords)
+
+
+	scanner.Scan()
+	apiConfig.BaseURL = scanner.Text()
+
+	scanner.Scan()
+	apiConfig.APIKey = scanner.Text()
+
+	return apiConfig
+}
+
+
+// VerifyFileSignature only checks the signature of the target file if there is a gpg key to use
+func VerifyFileSignature(directory, targetFile, signedFile string, keys []io.Reader) error {
+	signature, err := os.Open(signedFile)
+	if err != nil {
+		return err
+	}
+
+	verificationTarget, err := os.Open(targetFile)
+	if err != nil {
+		return err
+	}
+
+	for _, keyReader := range keys {
+
+		keyring, err := openpgp.ReadArmoredKeyRing(keyReader)
+		if err != nil {
+			continue
+		}
+
+		_, err = openpgp.CheckArmoredDetachedSignature(keyring, verificationTarget, signature)
+		if err == nil {
+			return nil
+		}
+	}
+
+	return fmt.Errorf("None of the current keys are able to verify the signature.")
 }

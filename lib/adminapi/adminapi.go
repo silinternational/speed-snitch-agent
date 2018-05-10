@@ -6,6 +6,7 @@ import (
 	"github.com/silinternational/speed-snitch-agent"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"runtime"
 	"strings"
 	"time"
@@ -115,4 +116,34 @@ func GetConfig(apiConfig agent.APIConfig) (agent.Config, error) {
 
 func getCallApiHeaders(apiConfig agent.APIConfig) map[string]string {
 	return map[string]string{"x-api-key": apiConfig.APIKey}
+}
+
+// Process logs to the logentries online log service
+func Log(apiConfig agent.APIConfig, logEntry agent.TaskLogEntry) error {
+
+	// Write to stdout/stderr
+	var localOutput *os.File
+	if logEntry.EntryType == "error" {
+		localOutput = os.Stderr
+	} else {
+		localOutput = os.Stdout
+	}
+	fmt.Fprintf(localOutput, "%v", logEntry)
+
+	logEntryJson, err := json.Marshal(logEntry)
+	if err != nil {
+		fmt.Fprint(os.Stderr, err.Error())
+		fmt.Fprintf(os.Stderr, "%v", logEntry)
+	}
+
+	url := fmt.Sprintf("%s/log/%s/%s", apiConfig.BaseURL, agent.GetMacAddr(), logEntry.EntryType)
+	resp, err := CallAPI("POST", url, string(logEntryJson), getCallApiHeaders(apiConfig))
+
+	// If there is an error, then resp won't be usable below
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintf(os.Stdout, "log api call response: "+resp.Status)
+	return nil
 }

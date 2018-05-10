@@ -1,0 +1,17 @@
+[Unit]
+Description=Go program to run speed tests and report results
+After=ssh.service
+
+[Service]
+User=pi
+Group=pi
+WorkingDirectory=/home/pi/speedsnitch
+
+# Uncomment the following line if you want to do any logging to LogEntries
+#Environment=LOGENTRIES_KEY=replace-this-with-a-real-one
+ExecStart=/home/pi/speedsnitch/speedsnitch https://replace-this-with-the-apis-url replace-this-with-the-api-key
+Type=simple
+Restart=always
+
+[Install]
+WantedBy=default.target
