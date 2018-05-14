@@ -9,17 +9,37 @@ import (
 )
 
 const DefaultFileMode = 0755
+const SignedFileSuffix = ".sig"
 
 // UpdateIfNeeded checks current version and config version and if different downloads the version from config
 // If returns true, update occurred and process should be restarted, if false, check err, but if err is nil all is okay
-func UpdateIfNeeded(currentVersion, configVersion, downloadURL string) (bool, error) {
+func UpdateIfNeeded(
+	currentVersion, configVersion, downloadURL string,
+	verifySignature bool,
+) (bool, error) {
 
 	if currentVersion != configVersion {
 		wd, _ := os.Getwd()
-		downloadFile := getFilenameFromURL(downloadURL) + `-new`
+		downloadFileBase := getFilenameFromURL(downloadURL)
+		downloadFile := downloadFileBase  + `-new`
 		err := agent.DownloadFile(wd+"/"+downloadFile, downloadURL, DefaultFileMode)
 		if err != nil {
 			return false, err
+		}
+
+		if verifySignature {
+			signedDownloadURL := downloadURL + SignedFileSuffix
+			signedFile := downloadFileBase + `-new.sig`
+			err := agent.DownloadFile(wd+"/"+signedFile, signedDownloadURL, DefaultFileMode)
+			if err != nil {
+				return false, fmt.Errorf("Error downloading signed file: %s", err.Error())
+			}
+
+			publicKeys := getPublicKeys()
+			err = agent.VerifyFileSignature(wd, downloadFile, signedFile, publicKeys)
+			if err != nil {
+				return false, fmt.Errorf("Error verifying the binary's signature: %s", err.Error())
+			}
 		}
 
 		execFilePath := wd+"/"+agent.ExeFileName
@@ -41,3 +61,5 @@ func getFilenameFromURL(URL string) string {
 	parts := strings.Split(URL, "/")
 	return parts[len(parts)-1]
 }
+
+

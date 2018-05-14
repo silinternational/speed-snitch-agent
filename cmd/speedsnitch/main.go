@@ -26,6 +26,13 @@ func main() {
 	apiConfig.BaseURL = os.Args[1]
 	apiConfig.APIKey = os.Args[2]
 
+	customApiConfig := agent.GetAppConfig(nil)
+	if customApiConfig.BaseURL != "" && customApiConfig.APIKey != "" {
+		apiConfig = customApiConfig
+
+		fmt.Println("Using Custom ApiConfig with BaseURL: %s", apiConfig.BaseURL)
+	}
+
 	config, err := adminapi.GetConfig(apiConfig)
 	if err != nil {
 		fmt.Println("Unable to fetch config from admin API:", err)
@@ -63,7 +70,13 @@ func main() {
 
 			tasks.UpdateTasks(config.Tasks, taskCron, newLogs)
 
-			wasNeeded, err := selfupdate.UpdateIfNeeded(agent.Version, config.Version.Number, config.Version.URL)
+			wasNeeded, err := selfupdate.UpdateIfNeeded(
+				agent.Version,
+				config.Version.Number,
+				config.Version.URL,
+				true,
+			)
+
 			if err != nil {
 				fmt.Println("Got error trying to self update ...\n\t" + err.Error())
 			} else if wasNeeded {
