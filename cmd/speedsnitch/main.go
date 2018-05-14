@@ -30,7 +30,7 @@ func main() {
 	if customApiConfig.BaseURL != "" && customApiConfig.APIKey != "" {
 		apiConfig = customApiConfig
 
-		fmt.Println("Using Custom ApiConfig with BaseURL: %s", apiConfig.BaseURL)
+		fmt.Printf("Using Custom ApiConfig with BaseURL: %s\n", apiConfig.BaseURL)
 	}
 
 	config, err := adminapi.GetConfig(apiConfig)
