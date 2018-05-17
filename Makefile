@@ -2,7 +2,7 @@ dep:
 	docker-compose run go dep ensure
 
 builddist:
-	docker-compose run go bash -c "cd cmd/speedsnitch && gox -output=\"../../dist/{{.OS}}/{{.Arch}}/speedsnitch\""
+	docker-compose run go ./build-sign-deploy.sh
 
 mac:
 	docker-compose run go bash -c "cd cmd/speedsnitch && GOOS=darwin GOARCH=amd64 go build"

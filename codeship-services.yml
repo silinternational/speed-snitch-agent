@@ -1,0 +1,11 @@
+go:
+  build:
+    dockerfile_path: Dockerfile
+  cached: true
+  encrypted_env_file: aws.env.encrypted
+  working_dir: /go/src/github.com/silinternational/speed-snitch-agent
+
+tracker:
+  image: silintl/app-deployment-tracker-ga:latest
+  environment:
+    TRACKING_ID: UA-56269387-10
