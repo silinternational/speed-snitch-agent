@@ -4,6 +4,7 @@
 
 - name: deploy
   service: go
+  exclude: ^(feature)
   command: ./build-sign-deploy.sh
 
 - name: track_deployment
