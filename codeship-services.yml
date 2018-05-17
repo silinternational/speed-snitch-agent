@@ -1,6 +1,7 @@
 go:
   build:
     dockerfile_path: Dockerfile
+  cached: true
   encrypted_env_file: aws.env.encrypted
   working_dir: /go/src/github.com/silinternational/speed-snitch-agent
 
