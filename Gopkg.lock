@@ -8,6 +8,20 @@
   revision = "7a984a84b5492ae539b79b62fb4a10afc63c7bcf"
 
 [[projects]]
+  branch = "master"
+  name = "golang.org/x/crypto"
+  packages = [
+    "cast5",
+    "openpgp",
+    "openpgp/armor",
+    "openpgp/elgamal",
+    "openpgp/errors",
+    "openpgp/packet",
+    "openpgp/s2k"
+  ]
+  revision = "1a580b3eff7814fc9b40602fd35256c63b50f491"
+
+[[projects]]
   branch = "v2"
   name = "gopkg.in/robfig/cron.v2"
   packages = ["."]
@@ -16,6 +30,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e7f421ece81d69574c980704d2fce77292e1d64ce4ec267be40bbd5e9ea0f3af"
+  inputs-digest = "3936eea4375888002878d87c388615cb8bd25da07eab546540c16b3acda6f671"
   solver-name = "gps-cdcl"
   solver-version = 1

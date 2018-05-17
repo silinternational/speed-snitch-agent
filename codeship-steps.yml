@@ -1,0 +1,12 @@
+- name: test
+  service: go
+  command: go test ./...
+
+- name: deploy
+  service: go
+  command: ./build-sign-deploy.sh
+
+- name: track_deployment
+  service: tracker
+  tag: ^(master|develop)
+  command: "true"
