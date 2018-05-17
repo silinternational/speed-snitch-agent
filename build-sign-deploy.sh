@@ -31,4 +31,4 @@ done
 # Push dist/ to S3 under folder for CI_BRANCH (ex: develop or 1.2.3)
 cd ../..
 CI_BRANCH=${CI_BRANCH:="unknown"}
-aws s3 sync dist/ s3://$DOWNLOAD_BUCKET${DOWNLOAD_BUCKET_PATH}/$CI_BRANCH/
+aws s3 sync dist/ s3://$DOWNLOAD_BUCKET$DOWNLOAD_BUCKET_PATH/$CI_BRANCH/
