@@ -46,7 +46,7 @@ func tempLog(text string) {
 }
 
 type configuration struct {
-	ServerID      int     `json:"ServerID"` // This must be present as an ID value in the serverList.go servers
+	ServerID      string  `json:"ServerID"` // This must be present as an ID value in the serverList.go servers
 	Timeout       int     `json:"Timeout"`
 	DownloadSizes []int   `json:"DownloadSizes"`
 	UploadSizes   []int   `json:"UploadSizes"`
@@ -56,7 +56,7 @@ type configuration struct {
 type server struct {
 	CC            string
 	Country       string
-	ID            int
+	ID            string
 	Latitude      float64
 	Longitude     float64
 	Name          string
@@ -366,7 +366,7 @@ func (s SpeedTestRunner) Run(taskData agent.TaskData) (agent.SpeedTestResults, e
 	testConfig := configuration{}
 
 	// Get the ID of the speedtestnet server
-	testConfig.ServerID, ok = taskData.IntValues[CFG_SERVER_ID]
+	testConfig.ServerID, ok = taskData.StringValues[CFG_SERVER_ID]
 
 	if !ok {
 		return emptyResults, fmt.Errorf("taskData.IntValues is missing an entry for %s", CFG_SERVER_ID)

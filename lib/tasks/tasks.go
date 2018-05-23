@@ -43,7 +43,7 @@ func UpdateTasks(
 					} else {
 						logEntry := agent.GetTaskLogEntry(agent.TypePing)
 						logEntry.Latency = spTestResults.Latency.Seconds() * 1000
-						logEntry.ServerID = task.Data.IntValues["serverID"]
+						logEntry.ServerID = task.Data.StringValues["serverID"]
 						newLogs <- logEntry
 						fmt.Fprint(os.Stdout, logEntry)
 					}
@@ -65,7 +65,7 @@ func UpdateTasks(
 						logEntry := agent.GetTaskLogEntry(agent.TypeSpeedTest)
 						logEntry.Download = spTestResults.Download
 						logEntry.Upload = spTestResults.Upload
-						logEntry.ServerID = task.Data.IntValues["serverID"]
+						logEntry.ServerID = task.Data.StringValues["serverID"]
 						newLogs <- logEntry
 					}
 				},

@@ -49,10 +49,10 @@ func TestGetConfig(t *testing.T) {
       "Schedule": "5 */6 * * *",
       "Data": {
         "StringValues": {
-          "testType": "allTests"
+          "testType": "allTests",
+          "serverID": "5029"
         },
         "IntValues": {
-          "serverID": 5029,
           "timeOut": 5
         },
         "FloatValues": {
