@@ -50,7 +50,7 @@ func TestManager(t *testing.T) {
 			EntryType: agent.TypePing,
 			Latency:   12.123,
 			Timestamp: 1525877951,
-			ServerID:  1234,
+			ServerID:  "1234",
 		},
 	}
 

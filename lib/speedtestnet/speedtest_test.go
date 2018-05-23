@@ -36,7 +36,7 @@ func TestLatencyTestMock(t *testing.T) {
 		fmt.Fprintf(w, `{"Test":"results"}`)
 	})
 
-	serverID := 5029
+	serverID := "5029"
 
 	config := configuration{
 		ServerID:      serverID,
@@ -77,7 +77,7 @@ func TestLatencyTestReal(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping test in short mode.")
 	}
-	serverID := 5029
+	serverID := "5029"
 
 	config := configuration{
 		ServerID:      serverID,
@@ -106,7 +106,7 @@ func TestLatencyTestReal(t *testing.T) {
 	if results <= 0 {
 		t.Fatalf("Error: Expected a positive Latency result, but got: %f", results)
 	}
-	fmt.Printf("\nLatency test results for server %d ... %f\n", serverID, results)
+	fmt.Printf("\nLatency test results for server %s ... %f\n", serverID, results)
 }
 
 
@@ -115,7 +115,7 @@ func TestDownloadTestReal(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping test in short mode.")
 	}
-	serverID := 5029
+	serverID := "5029"
 
 	config := configuration{
 		ServerID:      serverID,
@@ -146,7 +146,7 @@ func TestDownloadTestReal(t *testing.T) {
 		t.Errorf("Error: Expected a positive Download result, but got: %f", results)
 	}
 
-	fmt.Printf("\nDownload test results for server %d ... %f\n", serverID, results)
+	fmt.Printf("\nDownload test results for server %s ... %f\n", serverID, results)
 }
 
 // This does a real upload test unless you use the -short flag
@@ -154,7 +154,7 @@ func TestUploadTestReal(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping test in short mode.")
 	}
-	serverID := 5029
+	serverID := "5029"
 
 	config := configuration{
 		ServerID:      serverID,
@@ -184,7 +184,7 @@ func TestUploadTestReal(t *testing.T) {
 	if results <= 0 {
 		t.Errorf("Error: Expected a positive Upload result, but got: %f", results)
 	}
-	fmt.Printf("\nUpload test results for server %d ... %f\n", serverID, results)
+	fmt.Printf("\nUpload test results for server %s ... %f\n", serverID, results)
 }
 
 
@@ -196,8 +196,8 @@ func TestRunTestBadTestType(t *testing.T) {
 		StringValues: map[string]string{
 			CFG_TEST_TYPE: testType,
 			CFG_SERVER_HOST: "nyc.speedtest.sbcglobal.net:8080",
+			CFG_SERVER_ID: "5029",
 		},
-		IntValues: map[string]int {CFG_SERVER_ID: 5029 },
 	}
 
 	spdTestRunner := SpeedTestRunner{}
@@ -228,9 +228,9 @@ func TestRunTestLatencyReal(t *testing.T) {
 		StringValues: map[string]string{
 			CFG_TEST_TYPE: CFG_TYPE_LATENCY,
 			CFG_SERVER_HOST: "nyc.speedtest.sbcglobal.net:8080",
+			CFG_SERVER_ID: "5029",
 		},
 		IntValues: map[string]int {
-			CFG_SERVER_ID: 5029,
 			CFG_TIME_OUT: 5,
 		},
 	}
@@ -271,6 +271,7 @@ func TestRunTestAllReal(t *testing.T) {
 		StringValues: map[string]string{
 			CFG_TEST_TYPE: CFG_TYPE_ALL,
 			CFG_SERVER_HOST: "nyc.speedtest.sbcglobal.net:8080",
+			CFG_SERVER_ID: "5029",
 		},
 		IntValues: map[string]int {
 			CFG_SERVER_ID: 5029,

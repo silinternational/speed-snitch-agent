@@ -58,7 +58,7 @@ type TaskData struct {
 type TaskLogEntry struct {
 	Timestamp    int64   `json:"Timestamp"`
 	EntryType    string  `json:"EntryType"`
-	ServerID     int     `json:"ServerID,omitempty"`
+	ServerID     string  `json:"ServerID,omitempty"`
 	Upload       float64 `json:"Upload,omitempty"`
 	Download     float64 `json:"Download,omitempty"`
 	Latency      float64 `json:"Latency,omitempty"`

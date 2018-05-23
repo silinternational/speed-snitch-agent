@@ -30,10 +30,10 @@ func TestRunLatencyTest(t *testing.T) {
       "Data": {
         "StringValues": {
           "testType": "latencyTest",
+          "serverID": "5029",
           "Host": "nyc.speedtest.sbcglobal.net:8080"
         },
         "IntValues": {
-          "serverID": 5029,
           "timeOut": 5
         },
         "FloatValues": {
