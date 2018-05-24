@@ -126,12 +126,12 @@ func Log(apiConfig agent.APIConfig, logEntry agent.TaskLogEntry) error {
 	} else {
 		localOutput = os.Stdout
 	}
-	fmt.Fprintf(localOutput, "%v", logEntry)
+	fmt.Fprintf(localOutput, "%v\n", logEntry)
 
 	logEntryJson, err := json.Marshal(logEntry)
 	if err != nil {
 		fmt.Fprint(os.Stderr, err.Error())
-		fmt.Fprintf(os.Stderr, "%v", logEntry)
+		fmt.Fprintf(os.Stderr, "%v\n", logEntry)
 	}
 
 	url := fmt.Sprintf("%s/log/%s/%s", apiConfig.BaseURL, agent.GetMacAddr(), logEntry.EntryType)
@@ -142,6 +142,6 @@ func Log(apiConfig agent.APIConfig, logEntry agent.TaskLogEntry) error {
 		return err
 	}
 
-	fmt.Fprintf(os.Stdout, "log api call response: "+resp.Status)
+	fmt.Fprintf(os.Stdout, "log api call response: %s\n", resp.Status)
 	return nil
 }
