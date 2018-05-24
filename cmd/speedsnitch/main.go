@@ -63,7 +63,7 @@ func main() {
 		func() {
 			config, err := adminapi.GetConfig(apiConfig)
 			if err != nil {
-				fmt.Printf("\nError getting config from %s\n\t%s", apiConfig.BaseURL, err.Error())
+				fmt.Printf("\nError getting config from %s\n\t%s\n", apiConfig.BaseURL, err.Error())
 				return
 			}
 			fmt.Println("Just ran GetConfig with version " + agent.Version)
