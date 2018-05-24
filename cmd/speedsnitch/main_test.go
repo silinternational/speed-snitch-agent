@@ -4,21 +4,15 @@ import (
 	"fmt"
 	"github.com/silinternational/speed-snitch-agent"
 	"github.com/silinternational/speed-snitch-agent/lib/adminapi"
-	"github.com/silinternational/speed-snitch-agent/lib/logentries"
 	"github.com/silinternational/speed-snitch-agent/lib/logqueue"
 	"github.com/silinternational/speed-snitch-agent/lib/speedtestnet"
 	"net/http"
 	"net/http/httptest"
-	"os"
 	"testing"
 	"time"
 )
 
-// This does a real latency test unless you use the -short flag
 func TestRunLatencyTest(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping test in short mode.")
-	}
 
 	mux := http.NewServeMux()
 	server := httptest.NewServer(mux)
@@ -36,10 +30,10 @@ func TestRunLatencyTest(t *testing.T) {
       "Data": {
         "StringValues": {
           "testType": "latencyTest",
+          "serverID": "5029",
           "Host": "nyc.speedtest.sbcglobal.net:8080"
         },
         "IntValues": {
-          "serverID": 5029,
           "timeOut": 5
         },
         "FloatValues": {
@@ -99,39 +93,42 @@ func TestRunLatencyTest(t *testing.T) {
 	}
 }
 
-// This does a real call to logentries unless you use the -short flag
+
 func TestLogEntries(t *testing.T) {
-	if testing.Short() {
-		t.Skip("Skipping test in short mode.")
+	mux := http.NewServeMux()
+	server := httptest.NewServer(mux)
+
+	mux.HandleFunc("/log/"+agent.GetMacAddr()+"/testLog", func(w http.ResponseWriter, req *http.Request) {
+		w.Header().Set("Content-type", "application/json")
+		w.WriteHeader(200)
+		fmt.Fprintf(w, "")
+	})
+
+	testLogs := []agent.TaskLogEntry{
+		{
+			Timestamp: 11111111,
+			EntryType: "testLog",
+		},
+		{
+			Timestamp: 22222222,
+			EntryType: "testLog",
+		},
 	}
 
-	logEntriesKey := os.Getenv("LOGENTRIES_KEY")
+	newLogs := make(chan agent.TaskLogEntry)
 
-	if logEntriesKey == "" {
-		t.Fatal("No LOGENTRIES_KEY env variable available.")
+	apiConfig := agent.APIConfig{
+		BaseURL: server.URL,
+		APIKey:  "testing",
 	}
 
-	logger := agent.LoggerInstance{logentries.Logger{}}
-
-	testLogs := []string{
-		"Speed Snitch Agent: TestLogEntries ...  log1",
-		"Speed Snitch Agent: TestLogEntries ...  log2",
-		logqueue.FlushLogQueue,
-	}
-
-	newLogs := make(chan string)
-
-	go logqueue.Manager(newLogs, logEntriesKey, &logger)
+	go logqueue.Manager(apiConfig, newLogs)
 
 	for _, nextLog := range testLogs {
 		newLogs <- nextLog
 	}
 
-	time.Sleep(time.Millisecond * 1000) // allow time for connection to logentries
+	time.Sleep(time.Millisecond * 1000) // allow time for connection
 	close(newLogs)
 
-	println(`TO SEE THE RESULTS OF THIS TEST
-Go to the logentries set that matches your LOGENTRIES_KEY env var and look for ...
-Speed Snitch Agent: TestLogEntries ...  log1
-Speed Snitch Agent: TestLogEntries ...  log2`)
 }

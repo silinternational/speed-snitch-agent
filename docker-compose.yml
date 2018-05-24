@@ -8,7 +8,9 @@ services:
       dockerfile: Dockerfile
     environment:
       GOOS: linux
+    env_file:
+      - ./aws.env
     volumes:
       - ./:/go/src/github.com/silinternational/speed-snitch-agent
     working_dir: /go/src/github.com/silinternational/speed-snitch-agent
-    command: ["ash"]
+    command: ["bash"]

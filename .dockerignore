@@ -1,0 +1,6 @@
+*.aes
+.idea/
+aws.env
+aws.env.encrypted
+dist/
+vendor/

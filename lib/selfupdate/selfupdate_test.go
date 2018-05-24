@@ -32,14 +32,14 @@ func TestGetFilenameFromURL(t *testing.T) {
 
 func TestUpdateIfNeeded(t *testing.T) {
 	// Test if update not needed
-	updated, err := UpdateIfNeeded("1.0.0", "1.0.0", "https://dummy")
+	updated, err := UpdateIfNeeded("1.0.0", "1.0.0", "https://dummy", false)
 	if updated != false || err != nil {
 		t.Errorf("UpdateIfNeeded did not respond as expected for equal versions")
 		t.Fail()
 	}
 
 	// Test update needed but bad url
-	updated, err = UpdateIfNeeded("1.0.0", "2.0.0", "https://dummy")
+	updated, err = UpdateIfNeeded("1.0.0", "2.0.0", "https://dummy", false)
 	if updated != false || err == nil {
 		t.Errorf("UpdateIfNeeded should have returned an error for a bad url")
 		t.Fail()

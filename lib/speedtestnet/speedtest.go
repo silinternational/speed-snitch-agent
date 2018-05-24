@@ -21,6 +21,8 @@ const CFG_TYPE_LATENCY = "latencyTest"
 const CFG_TYPE_DOWNLOAD = "downloadTest"
 const CFG_TYPE_UPLOAD = "uploadTest"
 const CFG_TYPE_ALL = "allTests"
+const CFG_TYPE_SPEED_TEST = "speedTest"
+
 const MillisecondInt64 = int64(time.Millisecond)
 
 var Task agent.Task
@@ -44,7 +46,7 @@ func tempLog(text string) {
 }
 
 type configuration struct {
-	ServerID      int     `json:"ServerID"` // This must be present as an ID value in the serverList.go servers
+	ServerID      string  `json:"ServerID"` // This must be present as an ID value in the serverList.go servers
 	Timeout       int     `json:"Timeout"`
 	DownloadSizes []int   `json:"DownloadSizes"`
 	UploadSizes   []int   `json:"UploadSizes"`
@@ -54,7 +56,7 @@ type configuration struct {
 type server struct {
 	CC            string
 	Country       string
-	ID            int
+	ID            string
 	Latitude      float64
 	Longitude     float64
 	Name          string
@@ -327,6 +329,7 @@ func getTestType(taskData agent.TaskData) (string, error) {
 		CFG_TYPE_ALL,
 		CFG_TYPE_DOWNLOAD,
 		CFG_TYPE_LATENCY,
+		CFG_TYPE_SPEED_TEST,
 		CFG_TYPE_UPLOAD,
 	}
 
@@ -363,7 +366,7 @@ func (s SpeedTestRunner) Run(taskData agent.TaskData) (agent.SpeedTestResults, e
 	testConfig := configuration{}
 
 	// Get the ID of the speedtestnet server
-	testConfig.ServerID, ok = taskData.IntValues[CFG_SERVER_ID]
+	testConfig.ServerID, ok = taskData.StringValues[CFG_SERVER_ID]
 
 	if !ok {
 		return emptyResults, fmt.Errorf("taskData.IntValues is missing an entry for %s", CFG_SERVER_ID)
@@ -407,10 +410,13 @@ func (s SpeedTestRunner) Run(taskData agent.TaskData) (agent.SpeedTestResults, e
 	testServer.Speedtest = &spdTest
 	spdTest.Server = &testServer
 
-	// Run Latency Test in all cases
-	LatencyTest(&testServer)
-	if testType == CFG_TYPE_LATENCY {
-		return testServer.Results, nil
+	// If requested, run a Latency Test
+	if testType == CFG_TYPE_LATENCY || testType == CFG_TYPE_ALL {
+		LatencyTest(&testServer)
+
+		if testType == CFG_TYPE_LATENCY {
+			return testServer.Results, nil
+		}
 	}
 
 	// Get the desired MaxSeconds value
@@ -421,7 +427,7 @@ func (s SpeedTestRunner) Run(taskData agent.TaskData) (agent.SpeedTestResults, e
 	testConfig.MaxSeconds = maxSeconds
 
 	// If requested, get the Download Sizes and run the Download test
-	if testType == CFG_TYPE_DOWNLOAD || testType == CFG_TYPE_ALL {
+	if testType == CFG_TYPE_DOWNLOAD || testType == CFG_TYPE_SPEED_TEST || testType == CFG_TYPE_ALL {
 		downloadSizes, ok := taskData.IntSlices[CFG_DOWNLOAD_SIZES]
 		if !ok {
 			return emptyResults, fmt.Errorf("taskData.IntSlices is missing an entry for %s", CFG_DOWNLOAD_SIZES)
@@ -431,7 +437,7 @@ func (s SpeedTestRunner) Run(taskData agent.TaskData) (agent.SpeedTestResults, e
 	}
 
 	// If requested, get the Upload Sizes and run the Upload test
-	if testType == CFG_TYPE_UPLOAD || testType == CFG_TYPE_ALL {
+	if testType == CFG_TYPE_UPLOAD || testType == CFG_TYPE_SPEED_TEST || testType == CFG_TYPE_ALL {
 		uploadSizes, ok := taskData.IntSlices[CFG_UPLOAD_SIZES]
 		if !ok {
 			return emptyResults, fmt.Errorf("taskData.IntSlices is missing an entry for %s", CFG_UPLOAD_SIZES)
