@@ -2,7 +2,7 @@
 set -x
 
 # array of target os/arch
-targets=( "darwin/amd64" "linux/amd64" "linux/arm" "windows/amd64" )
+targets=( "darwin/amd64" "linux/amd64" "linux/arm" "windows/386" )
 distPath="../../dist"
 
 # download gpg keys to use for signing
@@ -16,7 +16,7 @@ do
     gox -osarch="${target}" -output="${distPath}/${target}/speedsnitch"
 
     # If OS is windows, append .exe to filename before signing
-    if [ "${target}" == "windows/amd64" ]
+    if [ "${target}" == "windows/386" ]
     then
         fileToSign="${distPath}/${target}/speedsnitch.exe"
     else
