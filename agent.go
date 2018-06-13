@@ -11,6 +11,8 @@ import (
 	"bufio"
 	"golang.org/x/crypto/openpgp"
 	"fmt"
+	"crypto/rand"
+	"math/big"
 )
 
 const TypePing = "ping"
@@ -242,4 +244,12 @@ func VerifyFileSignature(directory, targetFile, signedFile string, keys []io.Rea
 	}
 
 	return fmt.Errorf("None of the current keys are able to verify the signature.")
+}
+
+func GetRandomSecondAsString() string {
+	val, err := rand.Int(rand.Reader, big.NewInt(60))
+	if err != nil {
+		return "15"
+	}
+	return fmt.Sprintf("%v", val)
 }
