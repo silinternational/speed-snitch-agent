@@ -45,7 +45,7 @@ func TestGetRandomSecondAsString(t *testing.T) {
 	for i := 0; i < 100; i++ {
 		randomIntStr := GetRandomSecondAsString()
 		asInt, _ := strconv.ParseInt(randomIntStr, 10, 64)
-		if asInt < 0 || asInt > 50 {
+		if asInt < 0 || asInt > MaxSecondsOffset {
 			t.Errorf("Got back a random second outside valid range, got: %v", asInt)
 			t.Fail()
 		}

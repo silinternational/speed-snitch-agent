@@ -20,6 +20,7 @@ const TypeSpeedTest = "speedTest"
 const TypeError = "error"
 const Version = "0.0.3"
 const ExeFileName = "speedsnitch"
+const MaxSecondsOffset = 50
 
 const ConfigFileName = "speedsnitch.txt"
 
@@ -247,7 +248,7 @@ func VerifyFileSignature(directory, targetFile, signedFile string, keys []io.Rea
 }
 
 func GetRandomSecondAsString() string {
-	val, err := rand.Int(rand.Reader, big.NewInt(50))
+	val, err := rand.Int(rand.Reader, big.NewInt(MaxSecondsOffset))
 	if err != nil {
 		return "15"
 	}

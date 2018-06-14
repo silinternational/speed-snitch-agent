@@ -4,6 +4,7 @@ import (
 	"testing"
 	"strings"
 	"strconv"
+	"github.com/silinternational/speed-snitch-agent"
 )
 
 func TestGetCronScheduleWithRandomSeconds(t *testing.T) {
@@ -20,7 +21,7 @@ func TestGetCronScheduleWithRandomSeconds(t *testing.T) {
 		t.Error("Unable to parse first part of schedule as integer, err:", err.Error())
 		t.Fail()
 	}
-	if asInt < 0 || asInt > 50 {
+	if asInt < 0 || asInt > agent.MaxSecondsOffset {
 		t.Error("First part of schedule outside acceptable range, got: ", asInt)
 	}
 
@@ -42,7 +43,7 @@ func TestGetCronScheduleWithRandomSeconds(t *testing.T) {
 		t.Error("Unable to parse first part of schedule as integer, err:", err.Error())
 		t.Fail()
 	}
-	if asInt < 0 || asInt > 50 {
+	if asInt < 0 || asInt > agent.MaxSecondsOffset {
 		t.Error("First part of schedule outside acceptable range, got: ", asInt)
 	}
 }
