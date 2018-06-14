@@ -67,7 +67,7 @@ func main() {
 			now := time.Now()
 			config, err := adminapi.GetConfig(apiConfig)
 			if err != nil {
-				fmt.Printf("\n%sError getting config from %s\n\t%s\n", now.Format(time.RFC3339), apiConfig.BaseURL, err.Error())
+				fmt.Printf("\n%s Error getting config from %s\n\t%s\n", now.Format(time.RFC3339), apiConfig.BaseURL, err.Error())
 				return
 			}
 			fmt.Println(now.Format(time.RFC3339),"Just ran GetConfig with version " + agent.Version)
