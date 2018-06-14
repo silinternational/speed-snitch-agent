@@ -11,6 +11,8 @@ import (
 	"bufio"
 	"golang.org/x/crypto/openpgp"
 	"fmt"
+	"crypto/rand"
+	"math/big"
 )
 
 const TypePing = "ping"
@@ -18,6 +20,7 @@ const TypeSpeedTest = "speedTest"
 const TypeError = "error"
 const Version = "0.0.3"
 const ExeFileName = "speedsnitch"
+const MaxSecondsOffset = 50
 
 const ConfigFileName = "speedsnitch.txt"
 
@@ -242,4 +245,12 @@ func VerifyFileSignature(directory, targetFile, signedFile string, keys []io.Rea
 	}
 
 	return fmt.Errorf("None of the current keys are able to verify the signature.")
+}
+
+func GetRandomSecondAsString() string {
+	val, err := rand.Int(rand.Reader, big.NewInt(MaxSecondsOffset))
+	if err != nil {
+		return "15"
+	}
+	return fmt.Sprintf("%v", val)
 }

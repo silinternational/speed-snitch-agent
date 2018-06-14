@@ -48,25 +48,29 @@ func main() {
 	taskCron.Start()
 
 	sysCron := cron.New()
-
-	sysCron.AddFunc( // Say Hello 15 seconds past every minute
-		"15 * * * * *",
+	helloSchedule := agent.GetRandomSecondAsString() + " * * * * *"
+	fmt.Println("Hello schedule:", helloSchedule)
+	sysCron.AddFunc( // Say Hello every minute
+		helloSchedule,
 		func() {
 			adminapi.SayHello(apiConfig, agentStartTime)
-
-			fmt.Println("Just ran Say Hello with version " + agent.Version)
+			now := time.Now()
+			fmt.Println(now.Format(time.RFC3339), "Just ran Say Hello with version " + agent.Version)
 		},
 	)
 
+	getConfigSchedule := agent.GetRandomSecondAsString() + " */2 * * * *"
+	fmt.Println("Get Config schedule:", getConfigSchedule)
 	sysCron.AddFunc( // Get Config every 2 minutes
-		"*/2 * * * *",
+		getConfigSchedule,
 		func() {
+			now := time.Now()
 			config, err := adminapi.GetConfig(apiConfig)
 			if err != nil {
-				fmt.Printf("\nError getting config from %s\n\t%s\n", apiConfig.BaseURL, err.Error())
+				fmt.Printf("\n%s Error getting config from %s\n\t%s\n", now.Format(time.RFC3339), apiConfig.BaseURL, err.Error())
 				return
 			}
-			fmt.Println("Just ran GetConfig with version " + agent.Version)
+			fmt.Println(now.Format(time.RFC3339),"Just ran GetConfig with version " + agent.Version)
 
 			tasks.UpdateTasks(config.Tasks, taskCron, newLogs)
 
@@ -78,10 +82,10 @@ func main() {
 			)
 
 			if err != nil {
-				fmt.Println("Got error trying to self update ...\n\t" + err.Error())
+				fmt.Println(now.Format(time.RFC3339), "Got error trying to self update ...\n\t" + err.Error())
 			} else if wasNeeded {
 				wd, _ := os.Getwd()
-				fmt.Println("Self update was needed. Current working directory: " + wd)
+				fmt.Println(now.Format(time.RFC3339), "Self update was needed. Current working directory: " + wd)
 			}
 		},
 	)
