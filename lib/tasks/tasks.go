@@ -3,6 +3,7 @@ package tasks
 import (
 	"fmt"
 	"github.com/silinternational/speed-snitch-agent"
+	"github.com/silinternational/speed-snitch-agent/lib/icmp"
 	"github.com/silinternational/speed-snitch-agent/lib/speedtestnet"
 	"gopkg.in/robfig/cron.v2"
 	"os"
@@ -32,9 +33,7 @@ func UpdateTasks(
 			mainCron.AddFunc(
 				getCronScheduleWithRandomSeconds(task.Schedule),
 				func() {
-
-					spdTestRunner := speedtestnet.SpeedTestRunner{}
-					spTestResults, err := spdTestRunner.Run(task.Data)
+					spTestResults, err := icmp.Ping(task.NamedServer.ServerHost, 0, 0, 0)
 					if err != nil {
 						logEntry := agent.GetTaskLogEntry(agent.TypeError)
 						logEntry.ErrorCode = "1525283932"

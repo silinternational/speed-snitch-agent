@@ -27,3 +27,7 @@
 [[constraint]]
   name = "github.com/bsphere/le_go"
   branch = "master"
+
+[[constraint]]
+  name = "github.com/sparrc/go-ping"
+  branch = "master"
