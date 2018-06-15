@@ -1,16 +1,15 @@
 package speedtestnet
 
 import (
+	"fmt"
 	"github.com/silinternational/speed-snitch-agent"
-	"testing"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"net/http/httptest"
-	"fmt"
 	"strings"
-	"io/ioutil"
+	"testing"
 )
-
 
 func fixture(path string) string {
 	b, err := ioutil.ReadFile("../../testdata/fixtures/" + path)
@@ -28,7 +27,6 @@ func TestNewClient(t *testing.T) {
 	}
 }
 
-
 func TestLatencyTestMock(t *testing.T) {
 	mux := http.NewServeMux()
 	httpTestServer := httptest.NewServer(mux)
@@ -39,9 +37,9 @@ func TestLatencyTestMock(t *testing.T) {
 	serverID := "5029"
 
 	config := configuration{
-		ServerID:      serverID,
-		Timeout:       5,
-		MaxSeconds:    4.0,
+		ServerID:   serverID,
+		Timeout:    5,
+		MaxSeconds: 4.0,
 	}
 
 	server := GetServerByID(serverID)
@@ -80,8 +78,8 @@ func TestLatencyTestReal(t *testing.T) {
 	serverID := "5029"
 
 	config := configuration{
-		ServerID:      serverID,
-		Timeout:       5,
+		ServerID: serverID,
+		Timeout:  5,
 		//MaxSeconds:    4.0,
 	}
 
@@ -104,11 +102,10 @@ func TestLatencyTestReal(t *testing.T) {
 	results := allResults.Latency.Seconds()
 
 	if results <= 0 {
-		t.Fatalf("Error: Expected a positive Latency result, but got: %f", results)
+		t.Fatalf("Error: Expected a positive Latency result, but got: %f, err: %s", results, allResults.Error)
 	}
 	fmt.Printf("\nLatency test results for server %s ... %f\n", serverID, results)
 }
-
 
 // This does a real download test unless you use the -short flag
 func TestDownloadTestReal(t *testing.T) {
@@ -157,10 +154,10 @@ func TestUploadTestReal(t *testing.T) {
 	serverID := "5029"
 
 	config := configuration{
-		ServerID:      serverID,
-		Timeout:       5,
-		UploadSizes:   []int{256, 512},
-		MaxSeconds:    2.0,
+		ServerID:    serverID,
+		Timeout:     5,
+		UploadSizes: []int{256, 512},
+		MaxSeconds:  2.0,
 	}
 
 	server := GetServerByID(serverID)
@@ -187,16 +184,15 @@ func TestUploadTestReal(t *testing.T) {
 	fmt.Printf("\nUpload test results for server %s ... %f\n", serverID, results)
 }
 
-
 func TestRunTestBadTestType(t *testing.T) {
 	emptyTestResults := agent.SpeedTestResults{}
 	testType := "BadTestType"
 
 	taskData := agent.TaskData{
 		StringValues: map[string]string{
-			CFG_TEST_TYPE: testType,
+			CFG_TEST_TYPE:   testType,
 			CFG_SERVER_HOST: "nyc.speedtest.sbcglobal.net:8080",
-			CFG_SERVER_ID: "5029",
+			CFG_SERVER_ID:   "5029",
 		},
 	}
 
@@ -217,7 +213,6 @@ func TestRunTestBadTestType(t *testing.T) {
 	}
 }
 
-
 // This does a real latency test unless you use the -short flag
 func TestRunTestLatencyReal(t *testing.T) {
 	if testing.Short() {
@@ -226,11 +221,11 @@ func TestRunTestLatencyReal(t *testing.T) {
 
 	taskData := agent.TaskData{
 		StringValues: map[string]string{
-			CFG_TEST_TYPE: CFG_TYPE_LATENCY,
+			CFG_TEST_TYPE:   CFG_TYPE_LATENCY,
 			CFG_SERVER_HOST: "nyc.speedtest.sbcglobal.net:8080",
-			CFG_SERVER_ID: "5029",
+			CFG_SERVER_ID:   "5029",
 		},
-		IntValues: map[string]int {
+		IntValues: map[string]int{
 			CFG_TIME_OUT: 5,
 		},
 	}
@@ -269,15 +264,15 @@ func TestRunTestAllReal(t *testing.T) {
 
 	taskData := agent.TaskData{
 		StringValues: map[string]string{
-			CFG_TEST_TYPE: CFG_TYPE_ALL,
+			CFG_TEST_TYPE:   CFG_TYPE_ALL,
 			CFG_SERVER_HOST: "nyc.speedtest.sbcglobal.net:8080",
-			CFG_SERVER_ID: "5029",
+			CFG_SERVER_ID:   "5029",
 		},
-		IntValues: map[string]int {
+		IntValues: map[string]int{
 			CFG_SERVER_ID: 5029,
-			CFG_TIME_OUT: 5,
+			CFG_TIME_OUT:  5,
 		},
-		FloatValues: map[string]float64 {CFG_MAX_SECONDS: 6},
+		FloatValues: map[string]float64{CFG_MAX_SECONDS: 6},
 		IntSlices: map[string][]int{
 			CFG_DOWNLOAD_SIZES: {245388, 505544},
 			CFG_UPLOAD_SIZES:   {32768, 65536},

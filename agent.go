@@ -1,29 +1,28 @@
 package agent
 
 import (
+	"bufio"
 	"bytes"
+	"crypto/rand"
+	"fmt"
+	"golang.org/x/crypto/openpgp"
 	"io"
+	"math/big"
 	"net"
 	"net/http"
 	"os"
 	"strings"
 	"time"
-	"bufio"
-	"golang.org/x/crypto/openpgp"
-	"fmt"
-	"crypto/rand"
-	"math/big"
 )
 
 const TypePing = "ping"
 const TypeSpeedTest = "speedTest"
 const TypeError = "error"
-const Version = "0.0.5"
+const Version = "0.0.6"
 const ExeFileName = "speedsnitch"
 const MaxSecondsOffset = 50
 
 const ConfigFileName = "speedsnitch.txt"
-
 
 type APIConfig struct {
 	BaseURL string
@@ -45,9 +44,10 @@ type Config struct {
 }
 
 type Task struct {
-	Type     string   `json:"Type"`
-	Schedule string   `json:"Schedule"`
-	Data     TaskData `json:"Data"`
+	Type        string      `json:"Type"`
+	Schedule    string      `json:"Schedule"`
+	Data        TaskData    `json:"Data"`
+	NamedServer NamedServer `json:"NamedServer"`
 	SpeedTestRunner
 }
 
@@ -59,14 +59,32 @@ type TaskData struct {
 }
 
 type TaskLogEntry struct {
-	Timestamp    int64   `json:"Timestamp"`
-	EntryType    string  `json:"EntryType"`
-	ServerID     string  `json:"ServerID,omitempty"`
-	Upload       float64 `json:"Upload,omitempty"`
-	Download     float64 `json:"Download,omitempty"`
-	Latency      float64 `json:"Latency,omitempty"`
-	ErrorCode    string  `json:"ErrorCode,omitempty"`
-	ErrorMessage string  `json:"ErrorMessage,omitempty"`
+	Timestamp     int64   `json:"Timestamp"`
+	EntryType     string  `json:"EntryType"`
+	ServerCountry string  `json:"ServerCounty,omitempty"`
+	ServerID      string  `json:"ServerID,omitempty"`
+	Upload        float64 `json:"Upload,omitempty"`
+	Download      float64 `json:"Download,omitempty"`
+	Latency       float64 `json:"Latency,omitempty"`
+	ErrorCode     string  `json:"ErrorCode,omitempty"`
+	ErrorMessage  string  `json:"ErrorMessage,omitempty"`
+}
+
+type NamedServer struct {
+	ID                   string  `json:"ID"`
+	UID                  string  `json:"UID"`
+	ServerType           string  `json:"ServerType"`
+	SpeedTestNetServerID string  `json:"SpeedTestNetServerID"` // Only needed if ServerType is SpeedTestNetServer
+	ServerHost           string  `json:"ServerHost"`           // Needed for non-SpeedTestNetServers
+	Name                 string  `json:"Name"`
+	Description          string  `json:"Description"`
+	Country              Country `json:"Country"`
+	Notes                string  `json:"Notes"`
+}
+
+type Country struct {
+	Code string `json:"Code"`
+	Name string `json:"Name"`
 }
 
 type SpeedTestResults struct {
@@ -196,7 +214,7 @@ func GetAppConfig(reader io.Reader) APIConfig {
 		if configPath == "" {
 			return apiConfig
 		}
-		
+
 		configFilePath := configPath + "/" + ConfigFileName
 		var err error
 		reader, err = os.Open(configFilePath)
@@ -208,7 +226,6 @@ func GetAppConfig(reader io.Reader) APIConfig {
 	scanner := bufio.NewScanner(reader)
 	scanner.Split(bufio.ScanWords)
 
-
 	scanner.Scan()
 	apiConfig.BaseURL = scanner.Text()
 
@@ -217,7 +234,6 @@ func GetAppConfig(reader io.Reader) APIConfig {
 
 	return apiConfig
 }
-
 
 // VerifyFileSignature only checks the signature of the target file if there is a gpg key to use
 func VerifyFileSignature(directory, targetFile, signedFile string, keys []io.Reader) error {
