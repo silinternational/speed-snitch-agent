@@ -39,6 +39,12 @@ func Ping(host string, count, interval, timeout int) (agent.SpeedTestResults, er
 	pinger.Run()
 	stats := pinger.Statistics()
 
+	if stats.PacketsRecv == 0 {
+		return agent.SpeedTestResults{}, fmt.Errorf("zero ping packets received")
+	} else if stats.AvgRtt == 0 {
+		return agent.SpeedTestResults{}, fmt.Errorf("average RTT for ping reported as zero, something went wrong")
+	}
+
 	return agent.SpeedTestResults{
 		Timestamp: time.Now(),
 		Latency:   stats.AvgRtt,
