@@ -34,6 +34,7 @@ func Ping(host string, count, interval, timeout int) (agent.SpeedTestResults, er
 	pinger.Count = count
 	pinger.Interval = time.Duration(interval) * time.Second
 	pinger.Timeout = time.Duration(timeout) * time.Second
+	pinger.SetPrivileged(true)
 
 	pinger.Run()
 	stats := pinger.Statistics()
