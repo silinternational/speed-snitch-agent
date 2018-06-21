@@ -22,7 +22,7 @@ func CopyFile(sourcePath, targetPath string) error {
 		return fmt.Errorf("Error opening source file: %s\n%s", sourcePath, err.Error())
 	}
 
-	targetFile, err := os.OpenFile(targetPath, os.O_RDWR|os.O_CREATE, 0777)
+	targetFile, err := os.OpenFile(targetPath, os.O_RDWR|os.O_CREATE, DefaultFileMode)
 	if err != nil {
 		return fmt.Errorf("Error opening target file: %s\n%s", targetPath, err.Error())
 	}
