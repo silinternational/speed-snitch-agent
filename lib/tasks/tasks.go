@@ -19,6 +19,20 @@ func clearCron(mainCron *cron.Cron) {
 
 }
 
+func logError(
+	errorCode, errorBeginMsg string,
+	err error,
+	newLogs chan agent.TaskLogEntry,
+) agent.TaskLogEntry {
+
+	logEntry := agent.GetTaskLogEntry(agent.TypeError)
+	logEntry.ErrorCode = errorCode
+	logEntry.ErrorMessage = errorBeginMsg + err.Error()
+	newLogs <- logEntry
+
+	return logEntry
+}
+
 func UpdateTasks(
 	tasks []agent.Task,
 	mainCron *cron.Cron,
@@ -35,10 +49,7 @@ func UpdateTasks(
 				func() {
 					spTestResults, err := icmp.Ping(task.NamedServer.ServerHost, 0, 0, 0)
 					if err != nil {
-						logEntry := agent.GetTaskLogEntry(agent.TypeError)
-						logEntry.ErrorCode = "1525283932"
-						logEntry.ErrorMessage = "Error running latency test: " + err.Error()
-						newLogs <- logEntry
+						logEntry := logError("1525283932", "Error running latency test: ", err, newLogs)
 						fmt.Fprint(os.Stdout, logEntry)
 					} else {
 						logEntry := agent.GetTaskLogEntry(agent.TypePing)
@@ -58,10 +69,7 @@ func UpdateTasks(
 					spdTestRunner := speedtestnet.SpeedTestRunner{}
 					spTestResults, err := spdTestRunner.Run(task.Data)
 					if err != nil {
-						logEntry := agent.GetTaskLogEntry(agent.TypeError)
-						logEntry.ErrorCode = "1525291938"
-						logEntry.ErrorMessage = "Error running speed test: " + err.Error()
-						newLogs <- logEntry
+						logError("1525291938", "Error running speed test: ", err, newLogs)
 					} else {
 						logEntry := agent.GetTaskLogEntry(agent.TypeSpeedTest)
 						logEntry.Download = spTestResults.Download
@@ -69,6 +77,17 @@ func UpdateTasks(
 						logEntry.ServerCountry = task.NamedServer.Country.Code
 						logEntry.ServerID = task.NamedServer.SpeedTestNetServerID
 						newLogs <- logEntry
+					}
+				},
+			)
+		case agent.TypeReboot:
+			mainCron.AddFunc(
+				getCronScheduleWithRandomSeconds(task.Schedule),
+				func() {
+					err := agent.Reboot()
+					if err != nil {
+						logEntry := logError("1529675400", "Error rebooting: ", err,  newLogs)
+						fmt.Fprint(os.Stdout, logEntry)
 					}
 				},
 			)
