@@ -82,7 +82,7 @@ func UpdateTasks(
 			)
 		case agent.TypeReboot:
 			mainCron.AddFunc(
-				getCronScheduleWithRandomSeconds(task.Schedule),
+				task.Schedule,
 				func() {
 					err := agent.Reboot()
 					if err != nil {
