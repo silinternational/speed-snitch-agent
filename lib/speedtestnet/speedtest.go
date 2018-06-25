@@ -446,5 +446,9 @@ func (s SpeedTestRunner) Run(taskData agent.TaskData) (agent.SpeedTestResults, e
 		UploadTest(&testServer, testConfig.MaxSeconds, testConfig.UploadSizes)
 	}
 
+	if testServer.Results.Error != "" {
+		return emptyResults, fmt.Errorf(testServer.Results.Error)
+	}
+
 	return testServer.Results, nil
 }
