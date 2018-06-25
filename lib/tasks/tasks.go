@@ -23,6 +23,7 @@ func UpdateTasks(
 	tasks []agent.Task,
 	mainCron *cron.Cron,
 	newLogs chan agent.TaskLogEntry,
+	networkStatus *string,
 ) {
 	clearCron(mainCron)
 
@@ -33,6 +34,10 @@ func UpdateTasks(
 			mainCron.AddFunc(
 				getCronScheduleWithRandomSeconds(task.Schedule),
 				func() {
+					if *networkStatus == agent.NetworkOffline {
+						return
+					}
+
 					spTestResults, err := icmp.Ping(task.NamedServer.ServerHost, 0, 0, 0)
 					if err != nil {
 						logEntry := agent.GetTaskLogEntry(agent.TypeError)
@@ -43,6 +48,7 @@ func UpdateTasks(
 					} else {
 						logEntry := agent.GetTaskLogEntry(agent.TypePing)
 						logEntry.Latency = spTestResults.Latency.Seconds() * 1000
+						logEntry.PacketLossPercent = spTestResults.PacketLossPercent
 						logEntry.ServerCountry = task.NamedServer.Country.Code
 						logEntry.ServerID = task.NamedServer.SpeedTestNetServerID
 						newLogs <- logEntry
@@ -54,6 +60,9 @@ func UpdateTasks(
 			mainCron.AddFunc(
 				getCronScheduleWithRandomSeconds(task.Schedule),
 				func() {
+					if *networkStatus == agent.NetworkOffline {
+						return
+					}
 
 					spdTestRunner := speedtestnet.SpeedTestRunner{}
 					spTestResults, err := spdTestRunner.Run(task.Data)
