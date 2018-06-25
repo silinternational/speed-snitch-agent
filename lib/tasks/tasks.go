@@ -34,23 +34,25 @@ func UpdateTasks(
 			mainCron.AddFunc(
 				getCronScheduleWithRandomSeconds(task.Schedule),
 				func() {
-					if *networkStatus != agent.NetworkOffline {
-						spTestResults, err := icmp.Ping(task.NamedServer.ServerHost, 0, 0, 0)
-						if err != nil {
-							logEntry := agent.GetTaskLogEntry(agent.TypeError)
-							logEntry.ErrorCode = "1525283932"
-							logEntry.ErrorMessage = "Error running latency test: " + err.Error()
-							newLogs <- logEntry
-							fmt.Fprint(os.Stdout, logEntry)
-						} else {
-							logEntry := agent.GetTaskLogEntry(agent.TypePing)
-							logEntry.Latency = spTestResults.Latency.Seconds() * 1000
-							logEntry.PacketLossPercent = spTestResults.PacketLossPercent
-							logEntry.ServerCountry = task.NamedServer.Country.Code
-							logEntry.ServerID = task.NamedServer.SpeedTestNetServerID
-							newLogs <- logEntry
-							fmt.Fprint(os.Stdout, logEntry)
-						}
+					if *networkStatus == agent.NetworkOffline {
+						return
+					}
+
+					spTestResults, err := icmp.Ping(task.NamedServer.ServerHost, 0, 0, 0)
+					if err != nil {
+						logEntry := agent.GetTaskLogEntry(agent.TypeError)
+						logEntry.ErrorCode = "1525283932"
+						logEntry.ErrorMessage = "Error running latency test: " + err.Error()
+						newLogs <- logEntry
+						fmt.Fprint(os.Stdout, logEntry)
+					} else {
+						logEntry := agent.GetTaskLogEntry(agent.TypePing)
+						logEntry.Latency = spTestResults.Latency.Seconds() * 1000
+						logEntry.PacketLossPercent = spTestResults.PacketLossPercent
+						logEntry.ServerCountry = task.NamedServer.Country.Code
+						logEntry.ServerID = task.NamedServer.SpeedTestNetServerID
+						newLogs <- logEntry
+						fmt.Fprint(os.Stdout, logEntry)
 					}
 				},
 			)
@@ -58,22 +60,24 @@ func UpdateTasks(
 			mainCron.AddFunc(
 				getCronScheduleWithRandomSeconds(task.Schedule),
 				func() {
-					if *networkStatus != agent.NetworkOffline {
-						spdTestRunner := speedtestnet.SpeedTestRunner{}
-						spTestResults, err := spdTestRunner.Run(task.Data)
-						if err != nil {
-							logEntry := agent.GetTaskLogEntry(agent.TypeError)
-							logEntry.ErrorCode = "1525291938"
-							logEntry.ErrorMessage = "Error running speed test: " + err.Error()
-							newLogs <- logEntry
-						} else {
-							logEntry := agent.GetTaskLogEntry(agent.TypeSpeedTest)
-							logEntry.Download = spTestResults.Download
-							logEntry.Upload = spTestResults.Upload
-							logEntry.ServerCountry = task.NamedServer.Country.Code
-							logEntry.ServerID = task.NamedServer.SpeedTestNetServerID
-							newLogs <- logEntry
-						}
+					if *networkStatus == agent.NetworkOffline {
+						return
+					}
+
+					spdTestRunner := speedtestnet.SpeedTestRunner{}
+					spTestResults, err := spdTestRunner.Run(task.Data)
+					if err != nil {
+						logEntry := agent.GetTaskLogEntry(agent.TypeError)
+						logEntry.ErrorCode = "1525291938"
+						logEntry.ErrorMessage = "Error running speed test: " + err.Error()
+						newLogs <- logEntry
+					} else {
+						logEntry := agent.GetTaskLogEntry(agent.TypeSpeedTest)
+						logEntry.Download = spTestResults.Download
+						logEntry.Upload = spTestResults.Upload
+						logEntry.ServerCountry = task.NamedServer.Country.Code
+						logEntry.ServerID = task.NamedServer.SpeedTestNetServerID
+						newLogs <- logEntry
 					}
 				},
 			)

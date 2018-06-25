@@ -56,11 +56,13 @@ func main() {
 	sysCron.AddFunc( // Say Hello every minute
 		helloSchedule,
 		func() {
-			if networkStatus != agent.NetworkOffline {
-				adminapi.SayHello(apiConfig, agentStartTime)
-				now := time.Now()
-				fmt.Println(now.Format(time.RFC3339), "Just ran Say Hello with version "+agent.Version)
+			if networkStatus == agent.NetworkOffline {
+				return
 			}
+
+			adminapi.SayHello(apiConfig, agentStartTime)
+			now := time.Now()
+			fmt.Println(now.Format(time.RFC3339), "Just ran Say Hello with version "+agent.Version)
 		},
 	)
 
@@ -69,35 +71,37 @@ func main() {
 	sysCron.AddFunc( // Get Config every 2 minutes
 		getConfigSchedule,
 		func() {
-			if networkStatus != agent.NetworkOffline {
-				now := time.Now()
-				config, err := adminapi.GetConfig(apiConfig)
-				if err != nil {
-					fmt.Printf("\n%s Error getting config from %s\n\t%s\n", now.Format(time.RFC3339), apiConfig.BaseURL, err.Error())
-					return
-				}
-				fmt.Println(now.Format(time.RFC3339), "Just ran GetConfig with version "+agent.Version)
+			if networkStatus == agent.NetworkOffline {
+				return
+			}
 
-				tasks.UpdateTasks(config.Tasks, taskCron, newLogs, &networkStatus)
+			now := time.Now()
+			config, err := adminapi.GetConfig(apiConfig)
+			if err != nil {
+				fmt.Printf("\n%s Error getting config from %s\n\t%s\n", now.Format(time.RFC3339), apiConfig.BaseURL, err.Error())
+				return
+			}
+			fmt.Println(now.Format(time.RFC3339), "Just ran GetConfig with version "+agent.Version)
 
-				wasNeeded, err := selfupdate.UpdateIfNeeded(
-					agent.Version,
-					config.Version.Number,
-					config.Version.URL,
-					true,
-				)
+			tasks.UpdateTasks(config.Tasks, taskCron, newLogs, &networkStatus)
 
-				if err != nil {
-					fmt.Println(now.Format(time.RFC3339), "Got error trying to self update ...\n\t"+err.Error())
-				} else if wasNeeded {
-					wd, _ := os.Getwd()
-					fmt.Println(now.Format(time.RFC3339), "Self update was needed. Current working directory: "+wd)
-				}
+			wasNeeded, err := selfupdate.UpdateIfNeeded(
+				agent.Version,
+				config.Version.Number,
+				config.Version.URL,
+				true,
+			)
+
+			if err != nil {
+				fmt.Println(now.Format(time.RFC3339), "Got error trying to self update ...\n\t"+err.Error())
+			} else if wasNeeded {
+				wd, _ := os.Getwd()
+				fmt.Println(now.Format(time.RFC3339), "Self update was needed. Current working directory: "+wd)
 			}
 		},
 	)
 
-	checkNetworkStatusSchedule := agent.GetRandomSecondAsString() + " * * * * *"
+	checkNetworkStatusSchedule := agent.GetRandomSecondAsString() + " */5 * * * *"
 	fmt.Println("Check network status schedule:", checkNetworkStatusSchedule)
 	sysCron.AddFunc(
 		checkNetworkStatusSchedule,
@@ -112,7 +116,7 @@ func main() {
 				}
 				fmt.Printf("offline. Started at %s. Down for %v seconds",
 					networkOfflineStartTime.Format(time.RFC3339),
-					int64(time.Since(networkOfflineStartTime)/time.Duration(time.Second)))
+					int64(time.Since(networkOfflineStartTime)/time.Second))
 			} else if networkStatus == agent.NetworkOffline {
 				// reset status
 				networkStatus = agent.NetworkOnline
@@ -121,12 +125,12 @@ func main() {
 				downtime := time.Since(networkOfflineStartTime)
 				log := agent.GetTaskLogEntry("downtime")
 				log.DowntimeStart = networkOfflineStartTime.Format(time.RFC3339)
-				log.DowntimeSeconds = int64(downtime / time.Duration(time.Second))
+				log.DowntimeSeconds = int64(downtime / time.Second)
 				newLogs <- log
 
 				fmt.Printf("online. Restored at %s, Down for %v seconds",
 					networkOfflineStartTime.Format(time.RFC3339),
-					int64(time.Since(networkOfflineStartTime)/time.Duration(time.Second)))
+					int64(time.Since(networkOfflineStartTime)/time.Second))
 			} else {
 				// ensure status is online
 				networkStatus = agent.NetworkOnline
