@@ -1,5 +1,7 @@
 .idea/
 /cmd/speedsnitch/speedsnitch
+/cmd/speedsnitch/speedsnitch-new
+/cmd/speedsnitch/speedsnitch-new.sig
 vendor/
 aws.env
 *.aes

@@ -1,12 +1,10 @@
 package tasks
 
 import (
-	"fmt"
 	"github.com/silinternational/speed-snitch-agent"
 	"github.com/silinternational/speed-snitch-agent/lib/icmp"
 	"github.com/silinternational/speed-snitch-agent/lib/speedtestnet"
 	"gopkg.in/robfig/cron.v2"
-	"os"
 	"strings"
 )
 
@@ -44,7 +42,6 @@ func UpdateTasks(
 						logEntry.ErrorCode = "1525283932"
 						logEntry.ErrorMessage = "Error running latency test: " + err.Error()
 						newLogs <- logEntry
-						fmt.Fprint(os.Stdout, logEntry)
 					} else {
 						logEntry := agent.GetTaskLogEntry(agent.TypePing)
 						logEntry.Latency = spTestResults.Latency.Seconds() * 1000
@@ -52,7 +49,6 @@ func UpdateTasks(
 						logEntry.ServerCountry = task.NamedServer.Country.Code
 						logEntry.ServerID = task.NamedServer.SpeedTestNetServerID
 						newLogs <- logEntry
-						fmt.Fprint(os.Stdout, logEntry)
 					}
 				},
 			)
