@@ -46,7 +46,8 @@ func Ping(host string, count, interval, timeout int) (agent.SpeedTestResults, er
 	}
 
 	return agent.SpeedTestResults{
-		Timestamp: time.Now(),
-		Latency:   stats.AvgRtt,
+		Timestamp:         time.Now(),
+		Latency:           stats.AvgRtt,
+		PacketLossPercent: stats.PacketLoss,
 	}, nil
 }

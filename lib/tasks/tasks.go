@@ -1,12 +1,10 @@
 package tasks
 
 import (
-	"fmt"
 	"github.com/silinternational/speed-snitch-agent"
 	"github.com/silinternational/speed-snitch-agent/lib/icmp"
 	"github.com/silinternational/speed-snitch-agent/lib/speedtestnet"
 	"gopkg.in/robfig/cron.v2"
-	"os"
 	"strings"
 )
 
@@ -37,6 +35,7 @@ func UpdateTasks(
 	tasks []agent.Task,
 	mainCron *cron.Cron,
 	newLogs chan agent.TaskLogEntry,
+	networkStatus *string,
 ) {
 	clearCron(mainCron)
 
@@ -47,17 +46,23 @@ func UpdateTasks(
 			mainCron.AddFunc(
 				getCronScheduleWithRandomSeconds(task.Schedule),
 				func() {
+					if *networkStatus == agent.NetworkOffline {
+						return
+					}
+
 					spTestResults, err := icmp.Ping(task.NamedServer.ServerHost, 0, 0, 0)
 					if err != nil {
-						logEntry := logError("1525283932", "Error running latency test: ", err, newLogs)
-						fmt.Fprint(os.Stdout, logEntry)
+						logEntry := agent.GetTaskLogEntry(agent.TypeError)
+						logEntry.ErrorCode = "1525283932"
+						logEntry.ErrorMessage = "Error running latency test: " + err.Error()
+						newLogs <- logEntry
 					} else {
 						logEntry := agent.GetTaskLogEntry(agent.TypePing)
 						logEntry.Latency = spTestResults.Latency.Seconds() * 1000
+						logEntry.PacketLossPercent = spTestResults.PacketLossPercent
 						logEntry.ServerCountry = task.NamedServer.Country.Code
 						logEntry.ServerID = task.NamedServer.SpeedTestNetServerID
 						newLogs <- logEntry
-						fmt.Fprint(os.Stdout, logEntry)
 					}
 				},
 			)
@@ -65,6 +70,9 @@ func UpdateTasks(
 			mainCron.AddFunc(
 				getCronScheduleWithRandomSeconds(task.Schedule),
 				func() {
+					if *networkStatus == agent.NetworkOffline {
+						return
+					}
 
 					spdTestRunner := speedtestnet.SpeedTestRunner{}
 					spTestResults, err := spdTestRunner.Run(task.Data)

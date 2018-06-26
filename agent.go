@@ -20,12 +20,11 @@ import (
 const TypePing = "ping"
 const TypeSpeedTest = "speedTest"
 const TypeError = "error"
-const TypeReboot = "reboot"
-
-const Version = "0.0.6"
+const Version = "0.0.7"
 const ExeFileName = "speedsnitch"
 const MaxSecondsOffset = 50
-
+const NetworkOnline = "online"
+const NetworkOffline = "offline"
 const ConfigFileName = "speedsnitch.txt"
 
 type APIConfig struct {
@@ -63,15 +62,18 @@ type TaskData struct {
 }
 
 type TaskLogEntry struct {
-	Timestamp     int64   `json:"Timestamp"`
-	EntryType     string  `json:"EntryType"`
-	ServerCountry string  `json:"ServerCounty,omitempty"`
-	ServerID      string  `json:"ServerID,omitempty"`
-	Upload        float64 `json:"Upload,omitempty"`
-	Download      float64 `json:"Download,omitempty"`
-	Latency       float64 `json:"Latency,omitempty"`
-	ErrorCode     string  `json:"ErrorCode,omitempty"`
-	ErrorMessage  string  `json:"ErrorMessage,omitempty"`
+	Timestamp         int64   `json:"Timestamp"`
+	EntryType         string  `json:"EntryType"`
+	ServerCountry     string  `json:"ServerCountry,omitempty"`
+	ServerID          string  `json:"ServerID,omitempty"`
+	Upload            float64 `json:"Upload,omitempty"`
+	Download          float64 `json:"Download,omitempty"`
+	Latency           float64 `json:"Latency,omitempty"`
+	PacketLossPercent float64 `json:"PacketLossPercent,omitempty"`
+	ErrorCode         string  `json:"ErrorCode,omitempty"`
+	ErrorMessage      string  `json:"ErrorMessage,omitempty"`
+	DowntimeStart     string  `json:"DowntimeStart,omitempty"`
+	DowntimeSeconds   int64   `json:"DowntimeSeconds,omitempty"`
 }
 
 type NamedServer struct {
@@ -92,11 +94,12 @@ type Country struct {
 }
 
 type SpeedTestResults struct {
-	Download  float64       `json:"Download,omitempty"` // Mb per second
-	Upload    float64       `json:"Upload,omitempty"`   // Mb per second
-	Latency   time.Duration `json:"Latency,omitempty"`  // Latency in nanoseconds
-	Timestamp time.Time     `json:"Timestamp"`
-	Error     string        `json:"Error"`
+	Download          float64       `json:"Download,omitempty"`          // Mb per second
+	Upload            float64       `json:"Upload,omitempty"`            // Mb per second
+	Latency           time.Duration `json:"Latency,omitempty"`           // Latency in nanoseconds
+	PacketLossPercent float64       `json:"PacketLossPercent,omitempty"` // Percentage of package loss on ping
+	Timestamp         time.Time     `json:"Timestamp"`
+	Error             string        `json:"Error"`
 }
 
 type SpeedTestRunner interface {
