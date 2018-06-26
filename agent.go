@@ -19,8 +19,10 @@ import (
 
 const TypePing = "ping"
 const TypeSpeedTest = "speedTest"
+const TypeReboot = "reboot"
+
 const TypeError = "error"
-const Version = "0.0.7"
+const Version = "0.0.8"
 const ExeFileName = "speedsnitch"
 const MaxSecondsOffset = 50
 const NetworkOnline = "online"
