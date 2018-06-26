@@ -1,11 +1,13 @@
 package tasks
 
 import (
+	"fmt"
 	"github.com/silinternational/speed-snitch-agent"
 	"github.com/silinternational/speed-snitch-agent/lib/icmp"
 	"github.com/silinternational/speed-snitch-agent/lib/speedtestnet"
 	"gopkg.in/robfig/cron.v2"
 	"strings"
+	"os"
 )
 
 func clearCron(mainCron *cron.Cron) {
