@@ -18,7 +18,7 @@ import (
 const TypePing = "ping"
 const TypeSpeedTest = "speedTest"
 const TypeError = "error"
-const Version = "0.0.6"
+const Version = "0.0.7"
 const ExeFileName = "speedsnitch"
 const MaxSecondsOffset = 50
 const NetworkOnline = "online"
@@ -62,7 +62,7 @@ type TaskData struct {
 type TaskLogEntry struct {
 	Timestamp         int64   `json:"Timestamp"`
 	EntryType         string  `json:"EntryType"`
-	ServerCountry     string  `json:"ServerCounty,omitempty"`
+	ServerCountry     string  `json:"ServerCountry,omitempty"`
 	ServerID          string  `json:"ServerID,omitempty"`
 	Upload            float64 `json:"Upload,omitempty"`
 	Download          float64 `json:"Download,omitempty"`
