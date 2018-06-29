@@ -1,11 +1,13 @@
 package tasks
 
 import (
+	"fmt"
 	"github.com/silinternational/speed-snitch-agent"
 	"github.com/silinternational/speed-snitch-agent/lib/icmp"
 	"github.com/silinternational/speed-snitch-agent/lib/speedtestnet"
 	"gopkg.in/robfig/cron.v2"
 	"strings"
+	"os"
 )
 
 func clearCron(mainCron *cron.Cron) {
@@ -15,6 +17,20 @@ func clearCron(mainCron *cron.Cron) {
 		mainCron.Remove(nextEntry.ID)
 	}
 
+}
+
+func logError(
+	errorCode, errorBeginMsg string,
+	err error,
+	newLogs chan agent.TaskLogEntry,
+) agent.TaskLogEntry {
+
+	logEntry := agent.GetTaskLogEntry(agent.TypeError)
+	logEntry.ErrorCode = errorCode
+	logEntry.ErrorMessage = errorBeginMsg + err.Error()
+	newLogs <- logEntry
+
+	return logEntry
 }
 
 func UpdateTasks(
@@ -63,10 +79,7 @@ func UpdateTasks(
 					spdTestRunner := speedtestnet.SpeedTestRunner{}
 					spTestResults, err := spdTestRunner.Run(task.Data)
 					if err != nil {
-						logEntry := agent.GetTaskLogEntry(agent.TypeError)
-						logEntry.ErrorCode = "1525291938"
-						logEntry.ErrorMessage = "Error running speed test: " + err.Error()
-						newLogs <- logEntry
+						logError("1525291938", "Error running speed test: ", err, newLogs)
 					} else {
 						logEntry := agent.GetTaskLogEntry(agent.TypeSpeedTest)
 						logEntry.Download = spTestResults.Download
@@ -74,6 +87,17 @@ func UpdateTasks(
 						logEntry.ServerCountry = task.NamedServer.Country.Code
 						logEntry.ServerID = task.NamedServer.SpeedTestNetServerID
 						newLogs <- logEntry
+					}
+				},
+			)
+		case agent.TypeReboot:
+			mainCron.AddFunc(
+				task.Schedule,
+				func() {
+					err := agent.Reboot()
+					if err != nil {
+						logEntry := logError("1529675400", "Error rebooting: ", err,  newLogs)
+						fmt.Fprint(os.Stdout, logEntry)
 					}
 				},
 			)

@@ -13,12 +13,16 @@ import (
 	"os"
 	"strings"
 	"time"
+	"runtime"
+	"os/exec"
 )
 
 const TypePing = "ping"
 const TypeSpeedTest = "speedTest"
+const TypeReboot = "reboot"
+
 const TypeError = "error"
-const Version = "0.0.7"
+const Version = "0.0.8"
 const ExeFileName = "speedsnitch"
 const MaxSecondsOffset = 50
 const NetworkOnline = "online"
@@ -274,4 +278,18 @@ func GetRandomSecondAsString() string {
 		return "15"
 	}
 	return fmt.Sprintf("%v", val)
+}
+
+// Reboot checks the GOOS and GOARCH and if they are valid, reboots the system
+func Reboot() error {
+
+	goSys := runtime.GOOS + " " + runtime.GOARCH
+
+	switch goSys {
+	case "linux arm":
+		return exec.Command("reboot").Run()
+	default:
+		return fmt.Errorf("Not Implemented: rebooting %s.", goSys)
+	}
+
 }
