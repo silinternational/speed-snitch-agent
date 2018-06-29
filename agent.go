@@ -15,6 +15,7 @@ import (
 	"time"
 	"runtime"
 	"os/exec"
+	"regexp"
 )
 
 const TypePing = "ping"
@@ -161,6 +162,23 @@ func DownloadFile(filepath string, url string, mode os.FileMode) error {
 	return nil
 }
 
+
+// IsValidMacAddress checks whether the input is ...
+//   - 12 hexacedimal digits OR
+//   - 6 pairs of hexadecimal digits separated by colons and/or hyphens
+func IsValidMACAddress(mAddr string) bool {
+	controller := "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$"
+	match, _ := regexp.MatchString(controller, mAddr)
+
+	// no separators
+	if !match {
+		match, _ = regexp.MatchString("^([0-9A-Fa-f]{12})$", mAddr)
+	}
+
+	return match
+}
+
+
 // getMacAddr gets the lowest (alphabetically) MAC hardware
 // address of the host machine
 func GetMacAddr() string {
@@ -172,6 +190,11 @@ func GetMacAddr() string {
 		for _, i := range interfaces {
 			if bytes.Compare(i.HardwareAddr, nil) != 0 {
 				addr = i.HardwareAddr.String()
+
+				if ! IsValidMACAddress(addr) {
+					continue
+				}
+
 				if addr < lowestAddress {
 					lowestAddress = addr
 				}
