@@ -21,6 +21,7 @@ import (
 const TypePing = "ping"
 const TypeSpeedTest = "speedTest"
 const TypeReboot = "reboot"
+const TypeRestarted = "restarted" // For sending a log after a restart
 
 const TypeError = "error"
 const Version = "0.0.8"

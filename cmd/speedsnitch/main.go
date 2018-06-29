@@ -46,6 +46,10 @@ func main() {
 
 	go logqueue.Manager(apiConfig, newLogs)
 
+	// Log that the node just restarted
+	logEntry := agent.GetTaskLogEntry(agent.TypeRestarted)
+	newLogs <- logEntry
+
 	taskCron := cron.New()
 	tasks.UpdateTasks(config.Tasks, taskCron, newLogs, &networkStatus)
 	taskCron.Start()
