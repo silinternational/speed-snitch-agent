@@ -51,3 +51,29 @@ func TestGetRandomSecondAsString(t *testing.T) {
 		}
 	}
 }
+
+
+func TestIsValidMACAddress(t *testing.T) {
+	
+	type TestMacData struct {
+		macAddr string
+		isValid bool
+	}
+
+	testData := []TestMacData{
+		{macAddr: "08-00-27-10-B8-D0", isValid: true},
+		{macAddr: "00:00:00:00:00:0f", isValid: true},
+		{macAddr: "00:00:00:00:00:00:0f", isValid: false},
+		{macAddr: "11:22:33:44:55", isValid: false},
+	}
+
+	for _, nextData := range testData {
+		results := IsValidMACAddress(nextData.macAddr)
+		expected := nextData.isValid
+		if results != expected {
+			t.Errorf("Bad is-Valid Mac Address: %s. Expected: %t. But got: %t", nextData.macAddr, expected, results)
+			return
+		}
+	}
+
+}

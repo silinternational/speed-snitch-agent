@@ -114,7 +114,7 @@ func main() {
 
 			// use the pre-Ping time for networkOfflineStartTime
 			tempStartTime := time.Now().UTC()
-			
+
 			_, err := icmp.Ping("google.com", 2, 1, 30)
 			if err != nil {
 				// appears to be offline, change status and start tracking if needed
