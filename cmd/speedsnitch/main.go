@@ -46,6 +46,10 @@ func main() {
 
 	go logqueue.Manager(apiConfig, newLogs)
 
+	// Log that the node just restarted
+	logEntry := agent.GetTaskLogEntry(agent.TypeRestarted)
+	newLogs <- logEntry
+
 	taskCron := cron.New()
 	tasks.UpdateTasks(config.Tasks, taskCron, newLogs, &networkStatus)
 	taskCron.Start()
@@ -107,12 +111,16 @@ func main() {
 		checkNetworkStatusSchedule,
 		func() {
 			fmt.Printf("\nChecking network status...")
+
+			// use the pre-Ping time for networkOfflineStartTime
+			tempStartTime := time.Now().UTC()
+
 			_, err := icmp.Ping("google.com", 2, 1, 30)
 			if err != nil {
 				// appears to be offline, change status and start tracking if needed
 				if networkStatus != agent.NetworkOffline {
 					networkStatus = agent.NetworkOffline
-					networkOfflineStartTime = time.Now().UTC()
+					networkOfflineStartTime = tempStartTime
 				}
 				fmt.Printf("offline. Started at %s. Down for %v seconds",
 					networkOfflineStartTime.Format(time.RFC3339),
