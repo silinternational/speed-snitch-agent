@@ -12,3 +12,6 @@ linux:
 
 windows:
 	docker-compose run go bash -c "cd cmd/speedsnitch && GOOS=windows GOARCH=amd64 go build"
+
+test:
+	docker-compose run go go test ./...

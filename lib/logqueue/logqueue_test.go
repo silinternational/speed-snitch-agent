@@ -3,10 +3,10 @@ package logqueue
 import (
 	"fmt"
 	"github.com/silinternational/speed-snitch-agent"
-	"testing"
-	"time"
 	"net/http"
 	"net/http/httptest"
+	"testing"
+	"time"
 )
 
 var reportedLogs []string
@@ -47,10 +47,10 @@ func TestManager(t *testing.T) {
 
 	testLogs := []agent.TaskLogEntry{
 		{
-			EntryType: agent.TypePing,
-			Latency:   12.123,
-			Timestamp: 1525877951,
-			ServerID:  "1234",
+			EntryType:     agent.TypePing,
+			Latency:       12.123,
+			Timestamp:     1525877951,
+			NamedServerID: 1234,
 		},
 	}
 

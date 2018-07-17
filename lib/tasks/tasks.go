@@ -6,8 +6,8 @@ import (
 	"github.com/silinternational/speed-snitch-agent/lib/icmp"
 	"github.com/silinternational/speed-snitch-agent/lib/speedtestnet"
 	"gopkg.in/robfig/cron.v2"
-	"strings"
 	"os"
+	"strings"
 )
 
 func clearCron(mainCron *cron.Cron) {
@@ -52,7 +52,7 @@ func UpdateTasks(
 						return
 					}
 
-					spTestResults, err := icmp.Ping(task.NamedServer.ServerHost, 0, 0, 0)
+					spTestResults, err := icmp.Ping(task.ServerHost, 0, 0, 0)
 					if err != nil {
 						logEntry := agent.GetTaskLogEntry(agent.TypeError)
 						logEntry.ErrorCode = "1525283932"
@@ -62,8 +62,7 @@ func UpdateTasks(
 						logEntry := agent.GetTaskLogEntry(agent.TypePing)
 						logEntry.Latency = spTestResults.Latency.Seconds() * 1000
 						logEntry.PacketLossPercent = spTestResults.PacketLossPercent
-						logEntry.ServerCountry = task.NamedServer.Country.Code
-						logEntry.ServerID = task.NamedServer.SpeedTestNetServerID
+						logEntry.NamedServerID = task.NamedServerID
 						newLogs <- logEntry
 					}
 				},
@@ -77,15 +76,14 @@ func UpdateTasks(
 					}
 
 					spdTestRunner := speedtestnet.SpeedTestRunner{}
-					spTestResults, err := spdTestRunner.Run(task.Data)
+					spTestResults, err := spdTestRunner.Run(task.TaskData)
 					if err != nil {
 						logError("1525291938", "Error running speed test: ", err, newLogs)
 					} else {
 						logEntry := agent.GetTaskLogEntry(agent.TypeSpeedTest)
 						logEntry.Download = spTestResults.Download
 						logEntry.Upload = spTestResults.Upload
-						logEntry.ServerCountry = task.NamedServer.Country.Code
-						logEntry.ServerID = task.NamedServer.SpeedTestNetServerID
+						logEntry.NamedServerID = task.NamedServerID
 						newLogs <- logEntry
 					}
 				},
@@ -96,7 +94,7 @@ func UpdateTasks(
 				func() {
 					err := agent.Reboot()
 					if err != nil {
-						logEntry := logError("1529675400", "Error rebooting: ", err,  newLogs)
+						logEntry := logError("1529675400", "Error rebooting: ", err, newLogs)
 						fmt.Fprint(os.Stdout, logEntry)
 					}
 				},
