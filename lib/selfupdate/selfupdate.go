@@ -5,7 +5,6 @@ import (
 	"os"
 	"strings"
 	"fmt"
-	"io"
 	"runtime"
 	"os/exec"
 )
@@ -16,24 +15,12 @@ const SignedFileSuffix = ".sig"
 const WindowsOS = "windows"
 const WindowsServiceUpdater = "updateSpeedsnitch.bat"
 
-func CopyFile(sourcePath, targetPath string) error {
-	sourceFile, err := os.Open(sourcePath)
-	if err != nil {
-		return fmt.Errorf("Error opening source file: %s\n%s", sourcePath, err.Error())
-	}
+func CopyFileOnLinux(sourcePath, targetPath string) error {
 
-	targetFile, err := os.OpenFile(targetPath, os.O_RDWR|os.O_CREATE, DefaultFileMode)
-	if err != nil {
-		return fmt.Errorf("Error opening target file: %s\n%s", targetPath, err.Error())
-	}
-	defer targetFile.Close()
+	cmd := exec.Command("cp", "-f", sourcePath, targetPath)
+	err := cmd.Run()
 
-	_, err = io.Copy(targetFile, sourceFile)
-	if err != nil {
-		return fmt.Errorf("Error copying upgraded binary: %s  ->  %s \n%s", sourcePath, targetPath, err.Error())
-	}
-
-	return nil
+	return err
 }
 
 func VerifySignature(downloadURL, downloadFileBase, downloadFile, workingDir string) error {
@@ -95,7 +82,7 @@ func UpdateIfNeeded(
 		}
 	} else {
 		execFilePath := wd + "/" + agent.ExeFileName
-		err = CopyFile(downloadPath, execFilePath)
+		err = CopyFileOnLinux(downloadPath, execFilePath)
 		if err != nil {
 			return false, err
 		}
