@@ -47,7 +47,7 @@ func TestGetConfig(t *testing.T) {
     {
       "Type": "speedTest",
       "Schedule": "5 */6 * * *",
-      "Data": {
+      "TaskData": {
         "StringValues": {
           "testType": "allTests",
           "serverID": "5029"

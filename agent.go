@@ -11,11 +11,11 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"strings"
-	"time"
-	"runtime"
 	"os/exec"
 	"regexp"
+	"runtime"
+	"strings"
+	"time"
 )
 
 const TypePing = "ping"
@@ -51,10 +51,11 @@ type Config struct {
 }
 
 type Task struct {
-	Type        string      `json:"Type"`
-	Schedule    string      `json:"Schedule"`
-	Data        TaskData    `json:"Data"`
-	NamedServer NamedServer `json:"NamedServer"`
+	Type          string   `json:"Type"`
+	Schedule      string   `json:"Schedule"`
+	NamedServerID uint     `json:"NamedServerID"`
+	ServerHost    string   `json:"ServerHost"`
+	TaskData      TaskData `json:"TaskData"`
 	SpeedTestRunner
 }
 
@@ -69,7 +70,7 @@ type TaskLogEntry struct {
 	Timestamp         int64   `json:"Timestamp"`
 	EntryType         string  `json:"EntryType"`
 	ServerCountry     string  `json:"ServerCountry,omitempty"`
-	ServerID          string  `json:"ServerID,omitempty"`
+	NamedServerID     uint    `json:"NamedServerID,omitempty"`
 	Upload            float64 `json:"Upload,omitempty"`
 	Download          float64 `json:"Download,omitempty"`
 	Latency           float64 `json:"Latency,omitempty"`
@@ -78,23 +79,6 @@ type TaskLogEntry struct {
 	ErrorMessage      string  `json:"ErrorMessage,omitempty"`
 	DowntimeStart     string  `json:"DowntimeStart,omitempty"`
 	DowntimeSeconds   int64   `json:"DowntimeSeconds,omitempty"`
-}
-
-type NamedServer struct {
-	ID                   string  `json:"ID"`
-	UID                  string  `json:"UID"`
-	ServerType           string  `json:"ServerType"`
-	SpeedTestNetServerID string  `json:"SpeedTestNetServerID"` // Only needed if ServerType is SpeedTestNetServer
-	ServerHost           string  `json:"ServerHost"`           // Needed for non-SpeedTestNetServers
-	Name                 string  `json:"Name"`
-	Description          string  `json:"Description"`
-	Country              Country `json:"Country"`
-	Notes                string  `json:"Notes"`
-}
-
-type Country struct {
-	Code string `json:"Code"`
-	Name string `json:"Name"`
 }
 
 type SpeedTestResults struct {
@@ -163,7 +147,6 @@ func DownloadFile(filepath string, url string, mode os.FileMode) error {
 	return nil
 }
 
-
 // IsValidMacAddress checks whether the input is ...
 //   - 12 hexacedimal digits OR
 //   - 6 pairs of hexadecimal digits separated by colons and/or hyphens
@@ -179,7 +162,6 @@ func IsValidMACAddress(mAddr string) bool {
 	return match
 }
 
-
 // getMacAddr gets the lowest (alphabetically) MAC hardware
 // address of the host machine
 func GetMacAddr() string {
@@ -192,7 +174,7 @@ func GetMacAddr() string {
 			if bytes.Compare(i.HardwareAddr, nil) != 0 {
 				addr = i.HardwareAddr.String()
 
-				if ! IsValidMACAddress(addr) {
+				if !IsValidMACAddress(addr) {
 					continue
 				}
 
