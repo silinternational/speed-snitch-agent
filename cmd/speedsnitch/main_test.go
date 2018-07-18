@@ -27,7 +27,7 @@ func TestRunLatencyTest(t *testing.T) {
     {
       "Type": "speedTest",
       "Schedule": "5 */6 * * *",
-      "Data": {
+      "TaskData": {
         "StringValues": {
           "testType": "latencyTest",
           "serverID": "5029",
@@ -60,7 +60,7 @@ func TestRunLatencyTest(t *testing.T) {
 	}
 
 	config, _ := adminapi.GetConfig(apiConfig)
-	taskData := config.Tasks[0].Data
+	taskData := config.Tasks[0].TaskData
 
 	speedster := agent.SpeedTestInstance{speedtestnet.SpeedTestRunner{}}
 
@@ -92,7 +92,6 @@ func TestRunLatencyTest(t *testing.T) {
 		t.Errorf("Error: Expected a zero Upload result, but got: %f", results)
 	}
 }
-
 
 func TestLogEntries(t *testing.T) {
 	mux := http.NewServeMux()
