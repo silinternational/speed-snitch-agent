@@ -24,7 +24,7 @@ const TypeReboot = "reboot"
 const TypeRestarted = "restarted" // For sending a log after a restart
 
 const TypeError = "error"
-const Version = "0.0.9"
+const Version = "0.0.10"
 const ExeFileName = "speedsnitch"
 const MaxSecondsOffset = 50
 const NetworkOnline = "online"
