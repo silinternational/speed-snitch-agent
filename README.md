@@ -1,4 +1,7 @@
 # Speed Snitch Agent
+
+[![Go Report Card](https://goreportcard.com/badge/github.com/silinternational/speed-snitch-agent)](https://goreportcard.com/report/github.com/silinternational/speed-snitch-agent)
+
 This repo includes the source for our Speed Snitch agent which we use to monitor and report on internet speeds
 at remote locations. The agent communicates with a management API to receive configuration details related to Tasks 
 (speed tests, latency tests, etc.). 
