@@ -90,6 +90,12 @@ type SpeedTestResults struct {
 	Error             string        `json:"Error"`
 }
 
+func (s *SpeedTestResults)CleanData() {
+	if s.PacketLossPercent < 0 {
+		s.PacketLossPercent = 0
+	}
+}
+
 type SpeedTestRunner interface {
 	Run(TaskData) (SpeedTestResults, error)
 }
