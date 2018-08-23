@@ -45,9 +45,13 @@ func Ping(host string, count, interval, timeout int) (agent.SpeedTestResults, er
 		return agent.SpeedTestResults{}, fmt.Errorf("average RTT for ping reported as zero, something went wrong")
 	}
 
-	return agent.SpeedTestResults{
+	results := agent.SpeedTestResults{
 		Timestamp:         time.Now(),
 		Latency:           stats.AvgRtt,
 		PacketLossPercent: stats.PacketLoss,
-	}, nil
+	}
+
+	results.CleanData()
+
+	return results, nil
 }

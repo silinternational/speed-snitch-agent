@@ -4,6 +4,7 @@ import (
 	"testing"
 	"strings"
 	"strconv"
+	"time"
 )
 
 func TestGetAppConfig(t *testing.T) {
@@ -76,4 +77,28 @@ func TestIsValidMACAddress(t *testing.T) {
 		}
 	}
 
+}
+
+func TestSpeedTestResults_CleanData(t *testing.T) {
+	spResults := SpeedTestResults{
+		Latency: time.Duration(1),
+		PacketLossPercent: -9,
+	}
+
+	spResults.CleanData()
+	if spResults.PacketLossPercent != 0.0 {
+		t.Errorf("Bad PacketLossPercent. Expected: 0. But got: %.2f.\n%+v", spResults.PacketLossPercent, spResults)
+		return
+	}
+
+	spResults = SpeedTestResults{
+		Latency: time.Duration(2),
+		PacketLossPercent: 3,
+	}
+
+	spResults.CleanData()
+	if spResults.PacketLossPercent != 3.0 {
+		t.Errorf("Bad PacketLossPercent. Expected: 3. But got: %.2f.\n%+v", spResults.PacketLossPercent, spResults)
+		return
+	}
 }
