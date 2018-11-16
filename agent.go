@@ -178,7 +178,7 @@ func IsValidMACAddress(mAddr string, blacklistPrefixes []string) bool {
 
 func GetBlacklistedMacAddrPrefixes() []string {
 	blacklistedPrefixes := []string {
-		"7a:79",
+		"7a:79", // For LogMeIn Hamachi (virtual NIC)
 		"7a-79",
 	}
 	return blacklistedPrefixes
