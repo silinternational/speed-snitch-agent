@@ -156,7 +156,15 @@ func DownloadFile(filepath string, url string, mode os.FileMode) error {
 // IsValidMacAddress checks whether the input is ...
 //   - 12 hexacedimal digits OR
 //   - 6 pairs of hexadecimal digits separated by colons and/or hyphens
-func IsValidMACAddress(mAddr string) bool {
+// It also rejects those that begin with text that matches an entry in the blacklistPrefixes slice.
+func IsValidMACAddress(mAddr string, blacklistPrefixes []string) bool {
+
+	for _, prefix := range blacklistPrefixes {
+		if strings.HasPrefix(mAddr, prefix) {
+			return false
+		}
+	}
+
 	controller := "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$"
 	match, _ := regexp.MatchString(controller, mAddr)
 
@@ -168,6 +176,15 @@ func IsValidMACAddress(mAddr string) bool {
 	return match
 }
 
+func GetBlacklistedMacAddrPrefixes() []string {
+	blacklistedPrefixes := []string {
+		"7a:79", // For LogMeIn Hamachi (virtual NIC)
+		"7a-79",
+	}
+	return blacklistedPrefixes
+}
+
+
 // getMacAddr gets the lowest (alphabetically) MAC hardware
 // address of the host machine
 func GetMacAddr() string {
@@ -175,12 +192,14 @@ func GetMacAddr() string {
 	interfaces, err := net.Interfaces()
 	lowestAddress := "zz:zz:zz:zz:zz:zz"
 
+	blacklist := GetBlacklistedMacAddrPrefixes()
+
 	if err == nil {
 		for _, i := range interfaces {
 			if bytes.Compare(i.HardwareAddr, nil) != 0 {
 				addr = i.HardwareAddr.String()
 
-				if !IsValidMACAddress(addr) {
+				if !IsValidMACAddress(addr, blacklist) {
 					continue
 				}
 

@@ -54,7 +54,7 @@ func TestGetRandomSecondAsString(t *testing.T) {
 }
 
 
-func TestIsValidMACAddress(t *testing.T) {
+func TestIsValidMACAddressNoBlacklist(t *testing.T) {
 	
 	type TestMacData struct {
 		macAddr string
@@ -69,15 +69,67 @@ func TestIsValidMACAddress(t *testing.T) {
 	}
 
 	for _, nextData := range testData {
-		results := IsValidMACAddress(nextData.macAddr)
+		results := IsValidMACAddress(nextData.macAddr, []string{})
 		expected := nextData.isValid
 		if results != expected {
 			t.Errorf("Bad is-Valid Mac Address: %s. Expected: %t. But got: %t", nextData.macAddr, expected, results)
 			return
 		}
 	}
-
 }
+
+func TestIsValidMACAddressWithCustomBlacklist(t *testing.T) {
+
+	type TestMacData struct {
+		macAddr string
+		isValid bool
+	}
+
+	blacklist := []string{"99:99:99", "98-"}
+
+	testData := []TestMacData{
+		{macAddr: "08-00-27-10-B8-D0", isValid: true},
+		{macAddr: "99:99:00:00:00:0f", isValid: true},
+		{macAddr: "99:99:99:00:00:0f", isValid: false},
+		{macAddr: "98-11-22-33-44-55", isValid: false},
+	}
+
+	for _, nextData := range testData {
+		results := IsValidMACAddress(nextData.macAddr, blacklist)
+		expected := nextData.isValid
+		if results != expected {
+			t.Errorf("Bad is-Valid Mac Address: %s. Expected: %t. But got: %t", nextData.macAddr, expected, results)
+			return
+		}
+	}
+}
+
+func TestIsValidMACAddressWithActualBlacklist(t *testing.T) {
+
+	type TestMacData struct {
+		macAddr string
+		isValid bool
+	}
+
+	blacklist := GetBlacklistedMacAddrPrefixes()
+
+	testData := []TestMacData{
+		{macAddr: "7a-70-27-10-B8-D0", isValid: true},
+		{macAddr: "7a:70:00:00:00:0f", isValid: true},
+		{macAddr: "7a:79:99:00:00:0f", isValid: false},
+		{macAddr: "7a-79-22-33-44-55", isValid: false},
+	}
+
+	for _, nextData := range testData {
+		results := IsValidMACAddress(nextData.macAddr, blacklist)
+		expected := nextData.isValid
+		if results != expected {
+			t.Errorf("Bad is-Valid Mac Address: %s. Expected: %t. But got: %t", nextData.macAddr, expected, results)
+			return
+		}
+	}
+}
+
 
 func TestSpeedTestResults_CleanData(t *testing.T) {
 	spResults := SpeedTestResults{
