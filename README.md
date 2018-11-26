@@ -36,18 +36,19 @@ restarts following an update.
     - extras/pi_lib_systemd_system/speedSnitchWatcher.service
     - extras/pi_lib_systemd_system/speedSnitchWatcher.path
 3. Create symlinks for these files ...
-    $ cd /etc/systemd/system
-    $ mkdir -p default.target.wants
-    $ cd default.target.wants
-    $ sudo ln -s /usr/lib/systemd/system/speedSnitchAgent.service speedSnitchAgent.service
-    $ sudo ln -s /usr/lib/systemd/system/speedSnitchWatcher.service speedSnitchWatcher.service
-    $ sudo ln -s /usr/lib/systemd/system/speedSnitchWatcher.path speedSnitchWatcher.path
-4. Reload the systemd daemons and start the new services
-    $ sudo systemctl daemon-reload
-    $ sudo systemctl start speedSnitchWatcher.path
-    $ sudo systemctl start speedSnitchWatcher.service
-5. In order to view the status ... $ sudo systemctl status speedSnitchAgent.service
-6. In order to see more lines from its output ... $ journalctl -e -u speedSnitchAgent.service
+    - $ cd /etc/systemd/system
+    - $ mkdir -p default.target.wants
+    - $ cd default.target.wants
+    - $ sudo ln -s /usr/lib/systemd/system/speedSnitchAgent.service speedSnitchAgent.service
+    - $ sudo ln -s /usr/lib/systemd/system/speedSnitchWatcher.service speedSnitchWatcher.service
+    - $ sudo ln -s /usr/lib/systemd/system/speedSnitchWatcher.path speedSnitchWatcher.path
+4. In the /usr/lib/systemd/system/speedSnitchAgent.service file replace correct the parameters in the `ExecStart` value.
+6. Reload the systemd daemons and start the new services
+    - $ sudo systemctl daemon-reload
+    - $ sudo systemctl start speedSnitchWatcher.path
+    - $ sudo systemctl start speedSnitchWatcher.service
+7. In order to view the status ... $ sudo systemctl status speedSnitchAgent.service
+8. In order to see more lines from its output ... $ journalctl -e -u speedSnitchAgent.service
 
 
 ## License - MIT
