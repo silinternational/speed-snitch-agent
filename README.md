@@ -42,7 +42,7 @@ restarts following an update.
     - $ sudo ln -s /usr/lib/systemd/system/speedSnitchAgent.service speedSnitchAgent.service
     - $ sudo ln -s /usr/lib/systemd/system/speedSnitchWatcher.service speedSnitchWatcher.service
     - $ sudo ln -s /usr/lib/systemd/system/speedSnitchWatcher.path speedSnitchWatcher.path
-4. In the /usr/lib/systemd/system/speedSnitchAgent.service file replace correct the parameters in the `ExecStart` value.
+4. In the /usr/lib/systemd/system/speedSnitchAgent.service file replace the parameters in the `ExecStart` value.
 6. Reload the systemd daemons and start the new services
     - $ sudo systemctl daemon-reload
     - $ sudo systemctl start speedSnitchWatcher.path
