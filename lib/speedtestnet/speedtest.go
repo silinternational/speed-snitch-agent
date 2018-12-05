@@ -31,7 +31,7 @@ func NewClient() (*agent.Task, error) {
 	task := agent.Task{
 		Type:     agent.TypeSpeedTest,
 		Schedule: "",
-		Data: agent.TaskData{
+		TaskData: agent.TaskData{
 			IntValues: map[string]int{
 				CFG_SERVER_ID: 5029,
 			},

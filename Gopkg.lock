@@ -9,6 +9,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/sparrc/go-ping"
+  packages = ["."]
+  revision = "416e72114cd1edce2f287648f935a60dfe6cf40e"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/crypto"
   packages = [
     "cast5",
@@ -22,6 +28,19 @@
   revision = "1a580b3eff7814fc9b40602fd35256c63b50f491"
 
 [[projects]]
+  branch = "master"
+  name = "golang.org/x/net"
+  packages = [
+    "bpf",
+    "icmp",
+    "internal/iana",
+    "internal/socket",
+    "ipv4",
+    "ipv6"
+  ]
+  revision = "db08ff08e8622530d9ed3a0e8ac279f6d4c02196"
+
+[[projects]]
   branch = "v2"
   name = "gopkg.in/robfig/cron.v2"
   packages = ["."]
@@ -30,6 +49,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "3936eea4375888002878d87c388615cb8bd25da07eab546540c16b3acda6f671"
+  inputs-digest = "7e538eacd5c306d49920edc5a159829a8a5c0c8ee55d8a82606abb63ab165944"
   solver-name = "gps-cdcl"
   solver-version = 1

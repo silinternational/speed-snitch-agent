@@ -1,5 +1,5 @@
 [Path]
-PathModified=/home/pi/speedsnitch/speedsnitch
+PathModified=/opt/speedsnitch/speedsnitch
 
 [Install]
 WantedBy=default.target

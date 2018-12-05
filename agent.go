@@ -11,17 +11,24 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"os/exec"
+	"regexp"
+	"runtime"
 	"strings"
 	"time"
 )
 
 const TypePing = "ping"
 const TypeSpeedTest = "speedTest"
+const TypeReboot = "reboot"
+const TypeRestarted = "restarted" // For sending a log after a restart
+
 const TypeError = "error"
-const Version = "0.0.6"
+const Version = "0.0.11"
 const ExeFileName = "speedsnitch"
 const MaxSecondsOffset = 50
-
+const NetworkOnline = "online"
+const NetworkOffline = "offline"
 const ConfigFileName = "speedsnitch.txt"
 
 type APIConfig struct {
@@ -44,10 +51,11 @@ type Config struct {
 }
 
 type Task struct {
-	Type        string      `json:"Type"`
-	Schedule    string      `json:"Schedule"`
-	Data        TaskData    `json:"Data"`
-	NamedServer NamedServer `json:"NamedServer"`
+	Type          string   `json:"Type"`
+	Schedule      string   `json:"Schedule"`
+	NamedServerID uint     `json:"NamedServerID"`
+	ServerHost    string   `json:"ServerHost"`
+	TaskData      TaskData `json:"TaskData"`
 	SpeedTestRunner
 }
 
@@ -59,40 +67,33 @@ type TaskData struct {
 }
 
 type TaskLogEntry struct {
-	Timestamp     int64   `json:"Timestamp"`
-	EntryType     string  `json:"EntryType"`
-	ServerCountry string  `json:"ServerCounty,omitempty"`
-	ServerID      string  `json:"ServerID,omitempty"`
-	Upload        float64 `json:"Upload,omitempty"`
-	Download      float64 `json:"Download,omitempty"`
-	Latency       float64 `json:"Latency,omitempty"`
-	ErrorCode     string  `json:"ErrorCode,omitempty"`
-	ErrorMessage  string  `json:"ErrorMessage,omitempty"`
-}
-
-type NamedServer struct {
-	ID                   string  `json:"ID"`
-	UID                  string  `json:"UID"`
-	ServerType           string  `json:"ServerType"`
-	SpeedTestNetServerID string  `json:"SpeedTestNetServerID"` // Only needed if ServerType is SpeedTestNetServer
-	ServerHost           string  `json:"ServerHost"`           // Needed for non-SpeedTestNetServers
-	Name                 string  `json:"Name"`
-	Description          string  `json:"Description"`
-	Country              Country `json:"Country"`
-	Notes                string  `json:"Notes"`
-}
-
-type Country struct {
-	Code string `json:"Code"`
-	Name string `json:"Name"`
+	Timestamp         int64   `json:"Timestamp"`
+	EntryType         string  `json:"EntryType"`
+	ServerCountry     string  `json:"ServerCountry,omitempty"`
+	NamedServerID     uint    `json:"NamedServerID,omitempty"`
+	Upload            float64 `json:"Upload,omitempty"`
+	Download          float64 `json:"Download,omitempty"`
+	Latency           float64 `json:"Latency,omitempty"`
+	PacketLossPercent float64 `json:"PacketLossPercent,omitempty"`
+	ErrorCode         string  `json:"ErrorCode,omitempty"`
+	ErrorMessage      string  `json:"ErrorMessage,omitempty"`
+	DowntimeStart     string  `json:"DowntimeStart,omitempty"`
+	DowntimeSeconds   int64   `json:"DowntimeSeconds,omitempty"`
 }
 
 type SpeedTestResults struct {
-	Download  float64       `json:"Download,omitempty"` // Mb per second
-	Upload    float64       `json:"Upload,omitempty"`   // Mb per second
-	Latency   time.Duration `json:"Latency,omitempty"`  // Latency in nanoseconds
-	Timestamp time.Time     `json:"Timestamp"`
-	Error     string        `json:"Error"`
+	Download          float64       `json:"Download,omitempty"`          // Mb per second
+	Upload            float64       `json:"Upload,omitempty"`            // Mb per second
+	Latency           time.Duration `json:"Latency,omitempty"`           // Latency in nanoseconds
+	PacketLossPercent float64       `json:"PacketLossPercent,omitempty"` // Percentage of package loss on ping
+	Timestamp         time.Time     `json:"Timestamp"`
+	Error             string        `json:"Error"`
+}
+
+func (s *SpeedTestResults)CleanData() {
+	if s.PacketLossPercent < 0 {
+		s.PacketLossPercent = 0
+	}
 }
 
 type SpeedTestRunner interface {
@@ -152,6 +153,38 @@ func DownloadFile(filepath string, url string, mode os.FileMode) error {
 	return nil
 }
 
+// IsValidMacAddress checks whether the input is ...
+//   - 12 hexacedimal digits OR
+//   - 6 pairs of hexadecimal digits separated by colons and/or hyphens
+// It also rejects those that begin with text that matches an entry in the blacklistPrefixes slice.
+func IsValidMACAddress(mAddr string, blacklistPrefixes []string) bool {
+
+	for _, prefix := range blacklistPrefixes {
+		if strings.HasPrefix(mAddr, prefix) {
+			return false
+		}
+	}
+
+	controller := "^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$"
+	match, _ := regexp.MatchString(controller, mAddr)
+
+	// no separators
+	if !match {
+		match, _ = regexp.MatchString("^([0-9A-Fa-f]{12})$", mAddr)
+	}
+
+	return match
+}
+
+func GetBlacklistedMacAddrPrefixes() []string {
+	blacklistedPrefixes := []string {
+		"7a:79", // For LogMeIn Hamachi (virtual NIC)
+		"7a-79",
+	}
+	return blacklistedPrefixes
+}
+
+
 // getMacAddr gets the lowest (alphabetically) MAC hardware
 // address of the host machine
 func GetMacAddr() string {
@@ -159,10 +192,17 @@ func GetMacAddr() string {
 	interfaces, err := net.Interfaces()
 	lowestAddress := "zz:zz:zz:zz:zz:zz"
 
+	blacklist := GetBlacklistedMacAddrPrefixes()
+
 	if err == nil {
 		for _, i := range interfaces {
 			if bytes.Compare(i.HardwareAddr, nil) != 0 {
 				addr = i.HardwareAddr.String()
+
+				if !IsValidMACAddress(addr, blacklist) {
+					continue
+				}
+
 				if addr < lowestAddress {
 					lowestAddress = addr
 				}
@@ -269,4 +309,18 @@ func GetRandomSecondAsString() string {
 		return "15"
 	}
 	return fmt.Sprintf("%v", val)
+}
+
+// Reboot checks the GOOS and GOARCH and if they are valid, reboots the system
+func Reboot() error {
+
+	goSys := runtime.GOOS + " " + runtime.GOARCH
+
+	switch goSys {
+	case "linux arm":
+		return exec.Command("reboot").Run()
+	default:
+		return fmt.Errorf("Not Implemented: rebooting %s.", goSys)
+	}
+
 }

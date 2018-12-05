@@ -4,6 +4,7 @@ import (
 	"testing"
 	"strings"
 	"strconv"
+	"time"
 )
 
 func TestGetAppConfig(t *testing.T) {
@@ -49,5 +50,107 @@ func TestGetRandomSecondAsString(t *testing.T) {
 			t.Errorf("Got back a random second outside valid range, got: %v", asInt)
 			t.Fail()
 		}
+	}
+}
+
+
+func TestIsValidMACAddressNoBlacklist(t *testing.T) {
+	
+	type TestMacData struct {
+		macAddr string
+		isValid bool
+	}
+
+	testData := []TestMacData{
+		{macAddr: "08-00-27-10-B8-D0", isValid: true},
+		{macAddr: "00:00:00:00:00:0f", isValid: true},
+		{macAddr: "00:00:00:00:00:00:0f", isValid: false},
+		{macAddr: "11:22:33:44:55", isValid: false},
+	}
+
+	for _, nextData := range testData {
+		results := IsValidMACAddress(nextData.macAddr, []string{})
+		expected := nextData.isValid
+		if results != expected {
+			t.Errorf("Bad is-Valid Mac Address: %s. Expected: %t. But got: %t", nextData.macAddr, expected, results)
+			return
+		}
+	}
+}
+
+func TestIsValidMACAddressWithCustomBlacklist(t *testing.T) {
+
+	type TestMacData struct {
+		macAddr string
+		isValid bool
+	}
+
+	blacklist := []string{"99:99:99", "98-"}
+
+	testData := []TestMacData{
+		{macAddr: "08-00-27-10-B8-D0", isValid: true},
+		{macAddr: "99:99:00:00:00:0f", isValid: true},
+		{macAddr: "99:99:99:00:00:0f", isValid: false},
+		{macAddr: "98-11-22-33-44-55", isValid: false},
+	}
+
+	for _, nextData := range testData {
+		results := IsValidMACAddress(nextData.macAddr, blacklist)
+		expected := nextData.isValid
+		if results != expected {
+			t.Errorf("Bad is-Valid Mac Address: %s. Expected: %t. But got: %t", nextData.macAddr, expected, results)
+			return
+		}
+	}
+}
+
+func TestIsValidMACAddressWithActualBlacklist(t *testing.T) {
+
+	type TestMacData struct {
+		macAddr string
+		isValid bool
+	}
+
+	blacklist := GetBlacklistedMacAddrPrefixes()
+
+	testData := []TestMacData{
+		{macAddr: "7a-70-27-10-B8-D0", isValid: true},
+		{macAddr: "7a:70:00:00:00:0f", isValid: true},
+		{macAddr: "7a:79:99:00:00:0f", isValid: false},
+		{macAddr: "7a-79-22-33-44-55", isValid: false},
+	}
+
+	for _, nextData := range testData {
+		results := IsValidMACAddress(nextData.macAddr, blacklist)
+		expected := nextData.isValid
+		if results != expected {
+			t.Errorf("Bad is-Valid Mac Address: %s. Expected: %t. But got: %t", nextData.macAddr, expected, results)
+			return
+		}
+	}
+}
+
+
+func TestSpeedTestResults_CleanData(t *testing.T) {
+	spResults := SpeedTestResults{
+		Latency: time.Duration(1),
+		PacketLossPercent: -9,
+	}
+
+	spResults.CleanData()
+	if spResults.PacketLossPercent != 0.0 {
+		t.Errorf("Bad PacketLossPercent. Expected: 0. But got: %.2f.\n%+v", spResults.PacketLossPercent, spResults)
+		return
+	}
+
+	spResults = SpeedTestResults{
+		Latency: time.Duration(2),
+		PacketLossPercent: 3,
+	}
+
+	spResults.CleanData()
+	if spResults.PacketLossPercent != 3.0 {
+		t.Errorf("Bad PacketLossPercent. Expected: 3. But got: %.2f.\n%+v", spResults.PacketLossPercent, spResults)
+		return
 	}
 }

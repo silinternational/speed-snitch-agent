@@ -3,6 +3,7 @@ package tasks
 import (
 	"fmt"
 	"github.com/silinternational/speed-snitch-agent"
+	"github.com/silinternational/speed-snitch-agent/lib/icmp"
 	"github.com/silinternational/speed-snitch-agent/lib/speedtestnet"
 	"gopkg.in/robfig/cron.v2"
 	"os"
@@ -18,10 +19,25 @@ func clearCron(mainCron *cron.Cron) {
 
 }
 
+func logError(
+	errorCode, errorBeginMsg string,
+	err error,
+	newLogs chan agent.TaskLogEntry,
+) agent.TaskLogEntry {
+
+	logEntry := agent.GetTaskLogEntry(agent.TypeError)
+	logEntry.ErrorCode = errorCode
+	logEntry.ErrorMessage = errorBeginMsg + err.Error()
+	newLogs <- logEntry
+
+	return logEntry
+}
+
 func UpdateTasks(
 	tasks []agent.Task,
 	mainCron *cron.Cron,
 	newLogs chan agent.TaskLogEntry,
+	networkStatus *string,
 ) {
 	clearCron(mainCron)
 
@@ -32,22 +48,22 @@ func UpdateTasks(
 			mainCron.AddFunc(
 				getCronScheduleWithRandomSeconds(task.Schedule),
 				func() {
+					if *networkStatus == agent.NetworkOffline {
+						return
+					}
 
-					spdTestRunner := speedtestnet.SpeedTestRunner{}
-					spTestResults, err := spdTestRunner.Run(task.Data)
+					spTestResults, err := icmp.Ping(task.ServerHost, 0, 0, 0)
 					if err != nil {
 						logEntry := agent.GetTaskLogEntry(agent.TypeError)
 						logEntry.ErrorCode = "1525283932"
 						logEntry.ErrorMessage = "Error running latency test: " + err.Error()
 						newLogs <- logEntry
-						fmt.Fprint(os.Stdout, logEntry)
 					} else {
 						logEntry := agent.GetTaskLogEntry(agent.TypePing)
 						logEntry.Latency = spTestResults.Latency.Seconds() * 1000
-						logEntry.ServerCountry = task.NamedServer.Country.Code
-						logEntry.ServerID = task.NamedServer.SpeedTestNetServerID
+						logEntry.PacketLossPercent = spTestResults.PacketLossPercent
+						logEntry.NamedServerID = task.NamedServerID
 						newLogs <- logEntry
-						fmt.Fprint(os.Stdout, logEntry)
 					}
 				},
 			)
@@ -55,21 +71,31 @@ func UpdateTasks(
 			mainCron.AddFunc(
 				getCronScheduleWithRandomSeconds(task.Schedule),
 				func() {
+					if *networkStatus == agent.NetworkOffline {
+						return
+					}
 
 					spdTestRunner := speedtestnet.SpeedTestRunner{}
-					spTestResults, err := spdTestRunner.Run(task.Data)
+					spTestResults, err := spdTestRunner.Run(task.TaskData)
 					if err != nil {
-						logEntry := agent.GetTaskLogEntry(agent.TypeError)
-						logEntry.ErrorCode = "1525291938"
-						logEntry.ErrorMessage = "Error running speed test: " + err.Error()
-						newLogs <- logEntry
+						logError("1525291938", "Error running speed test: ", err, newLogs)
 					} else {
 						logEntry := agent.GetTaskLogEntry(agent.TypeSpeedTest)
 						logEntry.Download = spTestResults.Download
 						logEntry.Upload = spTestResults.Upload
-						logEntry.ServerCountry = task.NamedServer.Country.Code
-						logEntry.ServerID = task.NamedServer.SpeedTestNetServerID
+						logEntry.NamedServerID = task.NamedServerID
 						newLogs <- logEntry
+					}
+				},
+			)
+		case agent.TypeReboot:
+			mainCron.AddFunc(
+				task.Schedule,
+				func() {
+					err := agent.Reboot()
+					if err != nil {
+						logEntry := logError("1529675400", "Error rebooting: ", err, newLogs)
+						fmt.Fprint(os.Stdout, logEntry)
 					}
 				},
 			)

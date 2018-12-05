@@ -45,3 +45,13 @@ func TestUpdateIfNeeded(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestCopyFileOnLinux(t *testing.T) {
+	sourcePath := "./testSourceFile"
+	targetPath := "./testTargetFile"
+
+	err := CopyFileOnLinux(sourcePath, targetPath)
+	if err != nil {
+		t.Errorf("Unexpected error: %s", err.Error())
+	}
+}
