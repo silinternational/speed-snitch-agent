@@ -23,3 +23,15 @@ services:
       - ./docker/rpm:/data
     working_dir: /data
     command: ["/data/run-rpm.sh"]
+
+  fpm:
+    build:
+      context: ./docker/fpm
+      dockerfile: Dockerfile
+    volumes:
+      - ./docker/fpm:/data
+      - ./:/go/src/github.com/silinternational/speed-snitch-agent
+    working_dir: /data
+    env_file:
+      - fpm.env
+    command: ["/data/run-fpm.sh"]
