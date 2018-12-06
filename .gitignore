@@ -6,3 +6,6 @@ vendor/
 aws.env
 *.aes
 dist/
+fpm.env
+/docker/fpm/fpm/
+*.deb
