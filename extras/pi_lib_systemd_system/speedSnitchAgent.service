@@ -9,7 +9,7 @@ WorkingDirectory=/opt/speedsnitch
 
 # Uncomment the following line if you want to do any logging to LogEntries
 #Environment=LOGENTRIES_KEY=replace-this-with-a-real-one
-ExecStart=/opt/speedsnitch/speedsnitch https://replace-this-with-the-apis-url replace-this-with-the-api-key
+ExecStart=/opt/speedsnitch/speedsnitch ADMIN_API_BASE_URL API_KEY
 Type=simple
 Restart=always
 RestartSec=5
