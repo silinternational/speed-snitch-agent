@@ -15,15 +15,6 @@ services:
     working_dir: /go/src/github.com/silinternational/speed-snitch-agent
     command: ["bash"]
 
-  rpm:
-    build:
-      context: ./docker/rpm
-      dockerfile: Dockerfile
-    volumes:
-      - ./docker/rpm:/data
-    working_dir: /data
-    command: ["/data/run-rpm.sh"]
-
   fpm:
     build:
       context: ./docker/fpm
