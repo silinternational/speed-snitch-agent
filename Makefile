@@ -15,3 +15,6 @@ windows:
 
 test:
 	docker-compose run go go test ./...
+
+fpm:
+	docker-compose run --rm fpm
