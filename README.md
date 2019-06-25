@@ -6,8 +6,8 @@ This repo includes the source for our Speed Snitch agent which we use to monitor
 at remote locations. The agent communicates with a management API to receive configuration details related to Tasks 
 (speed tests, latency tests, etc.). 
 
-This project is in an early prototyping phase though so it is not a fully functional solution yet. There will eventually 
-be `speed-snitch-admin-api` and `speed-snitch-admin-ui` projects as well for the central management capabilities. 
+This project is intended to work in conjunction with the `speed-snitch-admin-api` and `speed-snitch-admin-ui` projects
+for the central management capabilities.  They can be found at github.com/silinternational.
 
 ## Build Instructions
 1. Run `make dep`
@@ -15,6 +15,11 @@ be `speed-snitch-admin-api` and `speed-snitch-admin-ui` projects as well for the
     - Mac: `make mac`
     - Linux: `make linux`
     - Windows: `make windows`
+
+## Debian Package
+1. Edit fpm.env based on the contents of fpm.env.dist but using the correct values
+2. Run `make fpm`
+3. The package will be created in ./docker/fpm as speedsnitch.linux_0.1.2_amd64.deb
 
 ## Release Process
 1. Create new release branch for version number from `develop` following convention `release/x.x.x`
@@ -36,18 +41,19 @@ restarts following an update.
     - extras/pi_lib_systemd_system/speedSnitchWatcher.service
     - extras/pi_lib_systemd_system/speedSnitchWatcher.path
 3. Create symlinks for these files ...
-    $ cd /etc/systemd/system
-    $ mkdir -p default.target.wants
-    $ cd default.target.wants
-    $ sudo ln -s /usr/lib/systemd/system/speedSnitchAgent.service speedSnitchAgent.service
-    $ sudo ln -s /usr/lib/systemd/system/speedSnitchWatcher.service speedSnitchWatcher.service
-    $ sudo ln -s /usr/lib/systemd/system/speedSnitchWatcher.path speedSnitchWatcher.path
-4. Reload the systemd daemons and start the new services
-    $ sudo systemctl daemon-reload
-    $ sudo systemctl start speedSnitchWatcher.path
-    $ sudo systemctl start speedSnitchWatcher.service
-5. In order to view the status ... $ sudo systemctl status speedSnitchAgent.service
-6. In order to see more lines from its output ... $ journalctl -e -u speedSnitchAgent.service
+    - $ cd /etc/systemd/system
+    - $ mkdir -p default.target.wants
+    - $ cd default.target.wants
+    - $ sudo ln -s /usr/lib/systemd/system/speedSnitchAgent.service speedSnitchAgent.service
+    - $ sudo ln -s /usr/lib/systemd/system/speedSnitchWatcher.service speedSnitchWatcher.service
+    - $ sudo ln -s /usr/lib/systemd/system/speedSnitchWatcher.path speedSnitchWatcher.path
+4. In the /usr/lib/systemd/system/speedSnitchAgent.service file replace the parameters in the `ExecStart` value.
+6. Reload the systemd daemons and start the new services
+    - $ sudo systemctl daemon-reload
+    - $ sudo systemctl start speedSnitchWatcher.path
+    - $ sudo systemctl start speedSnitchWatcher.service
+7. In order to view the status ... $ sudo systemctl status speedSnitchAgent.service
+8. In order to see more lines from its output ... $ journalctl -e -u speedSnitchAgent.service
 
 
 ## License - MIT

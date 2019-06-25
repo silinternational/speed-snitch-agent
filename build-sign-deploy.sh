@@ -2,7 +2,7 @@
 set -x
 
 # array of target os/arch
-targets=( "darwin/amd64" "linux/amd64" "linux/arm" "windows/386" )
+targets=( "darwin/amd64" "linux/386" "linux/amd64" "linux/arm" "windows/386" )
 distPath="../../dist"
 
 # download gpg keys to use for signing
