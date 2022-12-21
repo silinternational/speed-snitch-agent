@@ -1,4 +1,5 @@
-FROM golang:latest
+FROM golang:1.15
+# FROM golang:1.12.6-stretch
 
 RUN apt-get update -y && apt-get install -y awscli git
 RUN go get -u github.com/golang/dep/cmd/dep && go get github.com/mitchellh/gox
