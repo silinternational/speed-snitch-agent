@@ -1,4 +1,5 @@
 FROM golang:1.15
+# The previous deployment (with ":latest") appears to have matched the following image version
 # FROM golang:1.12.6-stretch
 
 RUN apt-get update -y && apt-get install -y awscli git
