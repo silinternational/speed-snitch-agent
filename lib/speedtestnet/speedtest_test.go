@@ -75,7 +75,7 @@ func TestLatencyTestReal(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping test in short mode.")
 	}
-	serverID := "5029"
+	serverID := "16976"
 
 	config := configuration{
 		ServerID: serverID,
@@ -112,7 +112,7 @@ func TestDownloadTestReal(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping test in short mode.")
 	}
-	serverID := "5029"
+	serverID := "16976"
 
 	config := configuration{
 		ServerID:      serverID,
@@ -151,7 +151,7 @@ func TestUploadTestReal(t *testing.T) {
 	if testing.Short() {
 		t.Skip("Skipping test in short mode.")
 	}
-	serverID := "5029"
+	serverID := "16976"
 
 	config := configuration{
 		ServerID:    serverID,
@@ -222,8 +222,8 @@ func TestRunTestLatencyReal(t *testing.T) {
 	taskData := agent.TaskData{
 		StringValues: map[string]string{
 			CFG_TEST_TYPE:   CFG_TYPE_LATENCY,
-			CFG_SERVER_HOST: "nyc.speedtest.sbcglobal.net:8080",
-			CFG_SERVER_ID:   "5029",
+			CFG_SERVER_HOST: "speedtest.nyc.rr.com:8080",
+			CFG_SERVER_ID:   "16976",
 		},
 		IntValues: map[string]int{
 			CFG_TIME_OUT: 5,
@@ -265,11 +265,11 @@ func TestRunTestAllReal(t *testing.T) {
 	taskData := agent.TaskData{
 		StringValues: map[string]string{
 			CFG_TEST_TYPE:   CFG_TYPE_ALL,
-			CFG_SERVER_HOST: "nyc.speedtest.sbcglobal.net:8080",
-			CFG_SERVER_ID:   "5029",
+			CFG_SERVER_HOST: "speedtest.nyc.rr.com:8080",
+			CFG_SERVER_ID:   "16976",
 		},
 		IntValues: map[string]int{
-			CFG_SERVER_ID: 5029,
+			CFG_SERVER_ID: 16976,
 			CFG_TIME_OUT:  5,
 		},
 		FloatValues: map[string]float64{CFG_MAX_SECONDS: 6},
