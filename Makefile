@@ -14,7 +14,7 @@ windows:
 	docker-compose run go bash -c "cd cmd/speedsnitch && GOOS=windows GOARCH=amd64 go build"
 
 test:
-	docker-compose run go go test ./...
+	docker-compose run --rm go go test ./...
 
 fpm:
 	docker-compose run --rm fpm

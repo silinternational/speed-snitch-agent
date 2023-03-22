@@ -10,8 +10,7 @@ This project is intended to work in conjunction with the `speed-snitch-admin-api
 for the central management capabilities.  They can be found at github.com/silinternational.
 
 ## Build Instructions
-1. Run `make dep`
-2. Build binary (this will create `cmd/speedsnitch/speedsnitch`):
+1. Build binary (this will create `cmd/speedsnitch/speedsnitch`):
     - Mac: `make mac`
     - Linux: `make linux`
     - Windows: `make windows`
@@ -25,10 +24,10 @@ for the central management capabilities.  They can be found at github.com/silint
 1. Create new release branch for version number from `develop` following convention `x.x.x`
    (note: don't include `release` in the name.)
 2. Update source with new version number
-4. Commit/push changes
-5. Create PR from `x.x.x` to `develop`
-6. After PR reviewed and merged, create PR from `develop` to `master`
-7. Review and merge PR to `master`
+3. Commit/push changes
+4. Create PR from `x.x.x` to `develop`
+5. After PR reviewed and merged, create PR from `develop` to `master`
+6. Review and merge PR to `master`
 
 
 ## Special Instructions for systemd on a Raspberry Pi
