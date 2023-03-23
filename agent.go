@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"crypto/rand"
 	"fmt"
-	"golang.org/x/crypto/openpgp"
 	"io"
 	"math/big"
 	"net"
@@ -16,6 +15,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	"golang.org/x/crypto/openpgp"
 )
 
 const TypePing = "ping"
@@ -24,7 +25,7 @@ const TypeReboot = "reboot"
 const TypeRestarted = "restarted" // For sending a log after a restart
 
 const TypeError = "error"
-const Version = "0.0.12"
+const Version = "0.0.13"
 const ExeFileName = "speedsnitch"
 const MaxSecondsOffset = 50
 const NetworkOnline = "online"
