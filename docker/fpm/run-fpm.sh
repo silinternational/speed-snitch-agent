@@ -9,7 +9,7 @@ mkdir -p fpm/usr/lib/systemd/system
 mkdir -p fpm/etc/systemd/system/default.target.wants
 
 # Copy in the systemd speedsnitch files
-cp -r /go/src/github.com/silinternational/speed-snitch-agent/extras/pi_lib_systemd_system/* /data/fpm/usr/lib/systemd/system
+cp -r /src/extras/pi_lib_systemd_system/* /data/fpm/usr/lib/systemd/system
 
 if [[ "x" == "x$ADMIN_API_BASE_URL" ]]; then
     echo "Missing ADMIN_API_BASE_URL environment variable";
@@ -27,11 +27,11 @@ fi
 
 
 # Create the speedsnitch binary for linux
-cd /go/src/github.com/silinternational/speed-snitch-agent/cmd/speedsnitch && GOOS=linux GOARCH=amd64 go build -o /data/fpm/opt/speedsnitch/speedsnitch
+cd /src/cmd/speedsnitch || exit
+GOOS=linux GOARCH=amd64 go build -o /data/fpm/opt/speedsnitch/speedsnitch
 
-cd /data
-
-fpm -s dir -t deb -n speedsnitch.linux -v ${APP_VERSION} \
+cd /data || exit
+fpm -s dir -t deb -n speedsnitch.linux -v "${APP_VERSION}" \
   --after-install ./after-install.sh \
   --deb-systemd-restart-after-upgrade \
   ./fpm/opt/speedsnitch/speedsnitch=/opt/speedsnitch/speedsnitch \
