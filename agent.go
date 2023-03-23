@@ -91,7 +91,7 @@ type SpeedTestResults struct {
 	Error             string        `json:"Error"`
 }
 
-func (s *SpeedTestResults)CleanData() {
+func (s *SpeedTestResults) CleanData() {
 	if s.PacketLossPercent < 0 {
 		s.PacketLossPercent = 0
 	}
@@ -112,12 +112,13 @@ type LogReporter interface {
 
 // Needed to be able to swap in a customized logging struct that implements a Logger
 // To use this ...
-//   ` // mycustomlogapp.go
-//   `type Logger struct {}`
-//   `func (l Logger) Process(logKey, text string, a ...interface{}) { ... }`
 //
-//   `// main.go
-//   `logger := agent.LoggerInstance{mycustomlogapp.Logger{}}`
+//	` // mycustomlogapp.go
+//	`type Logger struct {}`
+//	`func (l Logger) Process(logKey, text string, a ...interface{}) { ... }`
+//
+//	`// main.go
+//	`logger := agent.LoggerInstance{mycustomlogapp.Logger{}}`
 type LoggerInstance struct {
 	LogReporter
 }
@@ -157,6 +158,7 @@ func DownloadFile(filepath string, url string, mode os.FileMode) error {
 // IsValidMacAddress checks whether the input is ...
 //   - 12 hexacedimal digits OR
 //   - 6 pairs of hexadecimal digits separated by colons and/or hyphens
+//
 // It also rejects those that begin with text that matches an entry in the blacklistPrefixes slice.
 func IsValidMACAddress(mAddr string, blacklistPrefixes []string) bool {
 
@@ -178,13 +180,12 @@ func IsValidMACAddress(mAddr string, blacklistPrefixes []string) bool {
 }
 
 func GetBlacklistedMacAddrPrefixes() []string {
-	blacklistedPrefixes := []string {
+	blacklistedPrefixes := []string{
 		"7a:79", // For LogMeIn Hamachi (virtual NIC)
 		"7a-79",
 	}
 	return blacklistedPrefixes
 }
-
 
 // getMacAddr gets the lowest (alphabetically) MAC hardware
 // address of the host machine
@@ -244,8 +245,8 @@ func getCustomAppConfigPath() string {
 }
 
 // GetAppConfig accepts an io.Reader for testing purposes.
-//  If the io.Reader param is nil, then it uses the default
-//  config file to provide an custom APIConfig
+// If the io.Reader param is nil, then it uses the default
+// config file to provide an custom APIConfig
 func GetAppConfig(reader io.Reader) APIConfig {
 	apiConfig := APIConfig{}
 
