@@ -7,11 +7,6 @@
   exclude: ^(feature)
   command: ./build-sign-deploy.sh
 
-- name: track_deployment
-  service: tracker
-  tag: ^(master|develop)
-  command: "true"
-
 - name: ga4track_deployment
   service: ga4tracker
   tag: ^(master|develop)
