@@ -22,11 +22,11 @@ for the central management capabilities.  They can be found at github.com/silint
 3. The package will be created in ./docker/fpm as speedsnitch.linux_0.1.2_amd64.deb
 
 ## Release Process
-1. Create new release branch for version number from `develop` following convention `release/x.x.x`
+1. Create new release branch for version number from `develop` following convention `x.x.x`
+   (note: don't include `release` in the name.)
 2. Update source with new version number
-3. Run `make dist`
 4. Commit/push changes
-5. Create PR from `release/x.x.x` to `develop`
+5. Create PR from `x.x.x` to `develop`
 6. After PR reviewed and merged, create PR from `develop` to `master`
 7. Review and merge PR to `master`
 
