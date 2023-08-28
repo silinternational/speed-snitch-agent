@@ -5,11 +5,6 @@ go:
   encrypted_env_file: aws.env.encrypted
   working_dir: /go/src/github.com/silinternational/speed-snitch-agent
 
-tracker:
-  image: silintl/app-deployment-tracker-ga:latest
-  environment:
-    TRACKING_ID: UA-56269387-10
-
 ga4tracker:
   image: silintl/ga-event-tracker:1.0.2
   encrypted_env_file: aws.env.encrypted
