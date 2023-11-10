@@ -4,12 +4,3 @@ go:
   cached: true
   encrypted_env_file: aws.env.encrypted
   working_dir: /go/src/github.com/silinternational/speed-snitch-agent
-
-ga4tracker:
-  image: silintl/ga-event-tracker:1.0.2
-  encrypted_env_file: aws.env.encrypted
-  environment:
-    GA_MEASUREMENT_ID: G-NY4R8HM3Y3
-    GA_CLIENT_ID: speed_snitch_agent
-    # GA_EVENT_NAME is set by the codeship-steps command
-    # Add to the aws.env.encrypted file ... GA_API_SECRET
