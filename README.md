@@ -1,3 +1,7 @@
+# Archived
+
+This project is archived and is no longer maintained.
+
 # Speed Snitch Agent
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/silinternational/speed-snitch-agent)](https://goreportcard.com/report/github.com/silinternational/speed-snitch-agent)
